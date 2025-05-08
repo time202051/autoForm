@@ -1,5 +1,6 @@
 <template>
   <div :class="['navbar__right', navbarRightClass]">
+    <MenuSetting />
     <!-- 桌面端显示 -->
     <template v-if="isDesktop">
       <!-- 全屏 -->
@@ -34,6 +35,7 @@ import defaultSettings from "@/settings";
 import { DeviceEnum } from "@/enums/settings/device.enum";
 import { ThemeMode } from "@/enums/settings/theme.enum";
 import { useAppStore, useSettingsStore, useUserStore, useTagsViewStore } from "@/store";
+import MenuSetting from "@/layout/components/Sidebar/components/MenuSetting.vue";
 
 const appStore = useAppStore();
 const settingStore = useSettingsStore();

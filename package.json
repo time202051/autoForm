@@ -27,21 +27,15 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{cjs,json}": [
-      "prettier --write"
-    ],
     "*.{vue,html}": [
       "eslint --fix",
       "prettier --write",
       "stylelint --fix"
     ],
-    "*.{scss,css}": [
-      "stylelint --fix",
+    "*.{cjs,json}": [
       "prettier --write"
     ],
-    "*.md": [
-      "prettier --write"
-    ]
+    "failOnError": false
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -58,6 +52,7 @@
     "path-browserify": "^1.0.1",
     "path-to-regexp": "^8.2.0",
     "pinia": "^3.0.1",
+    "pinia-plugin-persistedstate": "^4.2.0",
     "qs": "^6.14.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
