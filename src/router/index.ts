@@ -22,37 +22,50 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import("@/views/login/index.vue"),
     meta: { hidden: true },
   },
-
   {
     path: "/",
     name: "/",
+    component: () => import("@/views/project/index.vue"), // 直接展示 project 页面
+  },
+  {
+    path: "/projectConfig", // 动态路由，id 为项目 ID
+    component: Layout,
+    children: [
+      {
+        path: ":id", // 子路径为空，表示默认加载的组件
+        component: () => import("@/views/projectConfig/index.vue"), // 低代码配置页面
+      },
+    ],
+  },
+  {
+    path: "/",
     component: Layout,
     redirect: "/dashboard",
     children: [
+      // {
+      //   path: "/dashboard",
+      //   component: () => import("@/views/dashboard/index.vue"),
+      //   name: "Dashboard",
+      //   meta: {
+      //     title: "首页",
+      //     icon: "homepage",
+      //     affix: true,
+      //     keepAlive: true,
+      //   },
+      // },
       {
-        path: "dashboard",
-        component: () => import("@/views/dashboard/index.vue"),
-        name: "Dashboard",
-        meta: {
-          title: "首页",
-          icon: "homepage",
-          affix: true,
-          keepAlive: true,
-        },
-      },
-      {
-        path: "profile",
+        path: "/profile",
         name: "Profile",
         component: () => import("@/views/profile/index.vue"),
         meta: { title: "个人中心", icon: "user", hidden: true },
       },
       {
-        path: "401",
+        path: "/401",
         component: () => import("@/views/error/401.vue"),
         meta: { hidden: true },
       },
       {
-        path: "404",
+        path: "/404",
         component: () => import("@/views/error/404.vue"),
         meta: { hidden: true },
       },
