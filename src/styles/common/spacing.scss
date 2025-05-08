@@ -1,0 +1,122 @@
+@for $i from 0 through 2000 {
+  $value: $i * 1;
+  .m#{$value} {
+    margin: #{$value}px;
+  }
+  .mt#{$value} {
+    margin-top: #{$value}px;
+  }
+  .mr#{$value} {
+    margin-right: #{$value}px;
+  }
+  .mb#{$value} {
+    margin-bottom: #{$value}px;
+  }
+  .ml#{$value} {
+    margin-left: #{$value}px;
+  }
+
+  .p#{$value} {
+    padding: #{$value}px;
+  }
+  .pt#{$value} {
+    padding-top: #{$value}px;
+  }
+  .pr#{$value} {
+    padding-right: #{$value}px;
+  }
+  .pb#{$value} {
+    padding-bottom: #{$value}px;
+  }
+  .pl#{$value} {
+    padding-left: #{$value}px;
+  }
+}
+
+@for $i from 0 through 3000 {
+  $value: $i * 1;
+  .w#{$value} {
+    width: #{$value}px;
+  }
+  .h#{$value} {
+    height: #{$value}px;
+  }
+}
+
+.fcc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fcs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.fce {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.fcb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fca {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.fsc {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.fss {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.fse {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+.fsb {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.fsa {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+}
+
+.fec {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.fes {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+.fee {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+.feb {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.fea {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+}
