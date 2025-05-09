@@ -8,13 +8,16 @@ import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/dark/css-vars.css";
 import "@/styles/index.scss";
 import "uno.css";
+import "epic-designer/dist/style.css";
+import "element-plus/dist/index.css";
+import { setupElementPlus } from "epic-designer/dist/ui/elementPlus";
 
 // 全局引入 animate.css
 import "animate.css";
 
 // 自动为某些默认事件（如 touchstart、wheel 等）添加 { passive: true },提升滚动性能并消除控制台的非被动事件监听警告
 import "default-passive-events";
-
+setupElementPlus();
 const app = createApp(App);
 // 注册插件
 app.use(setupPlugins);
