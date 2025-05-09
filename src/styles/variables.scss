@@ -17,9 +17,11 @@
     ),
   ),
 
+  // 页面中这样使用
+  // background-color: map-get($bg-color, "page");
   $bg-color: (
-    "page": #f5f8fd,
-  )
+      "page": #f5f8fd,
+    )
 );
 
 /** 全局SCSS变量 */

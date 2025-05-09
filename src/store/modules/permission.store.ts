@@ -99,8 +99,8 @@ export const usePermissionStore = defineStore(
             ...menu,
             children: [
               {
-                path: "",
-                name: path,
+                path: "index",
+                name: `${path}/index`,
                 meta: menu.meta,
                 component: modules[`../../views/projectConfig/index.vue`], // 子路由使用 projectConfig/index
               },
