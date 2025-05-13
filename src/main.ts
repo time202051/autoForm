@@ -11,7 +11,7 @@ import "uno.css";
 import "epic-designer/dist/style.css";
 import "element-plus/dist/index.css";
 import { setupElementPlus } from "epic-designer/dist/ui/elementPlus";
-
+import { InstallCodeMirror } from "codemirror-editor-vue3";
 // 全局引入 animate.css
 import "animate.css";
 
@@ -21,4 +21,5 @@ setupElementPlus();
 const app = createApp(App);
 // 注册插件
 app.use(setupPlugins);
+app.use(InstallCodeMirror);
 app.mount("#app");

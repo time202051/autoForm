@@ -103,5 +103,29 @@ declare global {
     /** 错误信息 */
     messageList: Array<string>;
   }
+
+
+  declare type T = any;
+  declare type Recordable<T = any> = Record<string, T>;
+
+  interface CompContentType {
+    text: any;
+    key?: string;
+    attr?: Recordable;
+    event?: Recordable;
+    ref?: Ref<T>;
+  }
+
+  declare interface CompType {
+    comp: string | Component;
+    data?: any;
+    key?: string;
+    attr?: Recordable;
+    event?: Recordable;
+    content?: CompContentType;
+    children?: Array<CompType> | [];
+    ref?: Ref<T>;
+    [key: string]: any;
+  }
 }
-export {};
+export { };

@@ -31,6 +31,6 @@ const appMainHeight = computed(() => {
 .app-main {
   position: relative;
   overflow-y: auto;
-  background-color: var(--el-bg-color-page);
+  // background-color: var(--el-bg-color-page);
 }
 </style>

@@ -2,22 +2,25 @@
   <div :class="ns.b()">
     <!-- 左侧内容 -->
     <div class="left-content">
-      <!-- <EDesigner /> -->
-      <el-button type="primary" @click="showFormConfig">Primary</el-button>
+      <BaseTable :tableOption></BaseTable>
     </div>
     <!-- 右侧面板 -->
     <div class="right-panel" v-show="isPanelOpen">
-      <div class="panel-content">右侧面板内容</div>
+      <el-scrollbar height="100%">
+        <!-- 直接修改相同数据源，无需保存 -->
+        <PageConfig v-model="tableOption"></PageConfig>
+        <!-- <TableConfig @save="onSave"></TableConfig> -->
+      </el-scrollbar>
     </div>
 
     <!-- 按钮 -->
-    <el-button
+    <!-- <el-button
       class="toggle-button"
       :style="{ left: isPanelOpen ? 'calc(100% - 400px - 40px)' : 'calc(100% - 40px)' }"
       @click="togglePanel"
     >
       {{ isPanelOpen ? "隐藏" : "显示" }}
-    </el-button>
+    </el-button> -->
     <Teleport to="body">
       <div v-if="dialogVisible" class="modal">
         <EDesigner title="表单配置" @save="saveFormHandler">
@@ -38,6 +41,10 @@ import { useNamespace } from "@/hooks";
 import { ref } from "vue";
 import { EDesigner, type PageSchema } from "epic-designer";
 import { Close } from "@element-plus/icons-vue";
+import BaseTable from "@/components/BaseTable/src/BaseTable.vue";
+import type { TableType } from "@/components/BaseTable/index";
+// import TableConfig from "./src/TableConfig.vue";
+import PageConfig from "./src/PageConfig.vue";
 
 const ns = useNamespace("projectConfig");
 
@@ -52,10 +59,165 @@ const showFormConfig = () => {
   dialogVisible.value = true;
 };
 
+const loading = ref(false);
+const tableOption = reactive<TableType | any>({
+  data: [
+    {
+      date: "2016-05-03",
+      name: "Tom",
+      address: "No. 189, Grove St, Los Angeles",
+    },
+    {
+      date: "2016-05-02",
+      name: "Tom",
+      address: "No. 189, Grove St, Los Angeles",
+    },
+    {
+      date: "2016-05-04",
+      name: "Tom",
+      address: "No. 189, Grove St, Los Angeles",
+    },
+    {
+      date: "2016-05-01",
+      name: "Tom",
+      address: "No. 189, Grove St, Los Angeles",
+    },
+  ],
+  loading: loading,
+  attr: {
+    border: true,
+    height: "100%",
+  },
+  columnArr: [
+    {
+      attr: {
+        prop: "name",
+        label: "姓名",
+      },
+    },
+    {
+      attr: {
+        prop: "date",
+        label: "日期",
+      },
+    },
+    {
+      attr: {
+        prop: "address",
+        label: "地址",
+      },
+    },
+    {
+      attr: {
+        label: "操作",
+      },
+      defaultSlotConfig: [
+        {
+          comp: "ElButton",
+          attr: {
+            type: "danger",
+          },
+          content: {
+            text: "编辑",
+          },
+          event: {
+            click: (e: any) => {
+              e.row.name = "张三";
+              console.log("点击了", e);
+              dialogVisible.value = true;
+            },
+          },
+        },
+        {
+          comp: "ElButton",
+          attr: {
+            type: "danger",
+          },
+          content: {
+            text: "删除",
+          },
+          event: {
+            click: (e: any) => {
+              console.log("点击了", e);
+              tableOption.data.splice(e.$index, 1);
+              console.log("tableOption", tableOption);
+            },
+          },
+        },
+      ],
+    },
+    // {
+    //   defaultSlotConfig: [
+    //     {
+    //       comp: "ElTableColumn",
+    //       attr: {
+    //         prop: "name",
+    //         label: "姓名",
+    //       },
+    //     },
+    //     {
+    //       comp: "ElTableColumn",
+    //       attr: {
+    //         prop: "date",
+    //         label: "日期",
+    //       },
+    //     },
+    //     {
+    //       comp: "ElTableColumn",
+    //       attr: {
+    //         prop: "address",
+    //         label: "地址",
+    //       },
+    //     },
+    //     // {
+    //     //   comp: "ElButton",
+    //     //   attr: {
+    //     //     type: "danger"
+    //     //   }
+    //     // }
+    //   ],
+    // },
+    // {
+    //   defaultSlotConfig: {
+    //     comp: "ElTableColumn",
+    //     attr: {
+    //       label: "操作",
+    //     },
+    //     children: [
+    //       {
+    //         comp: "ElButton",
+    //         attr: {
+    //           type: "danger",
+    //           onClick: (e: any) => {
+    //             console.log("被点击了", e);
+    //           },
+    //         },
+    //         content: {
+    //           text: "按钮",
+    //         },
+    //       },
+    //     ],
+    //   },
+    // },
+  ],
+  event: {},
+  eventConfigs: {},
+});
+
 const saveFormHandler = (e: PageSchema) => {
   dialogVisible.value = false;
   console.log("888", e);
 };
+
+// const onSave = (data: any) => {
+//   console.log(33, data);
+//   const { tableConfig } = data;
+//   Object.keys(tableConfig).forEach((key) => {
+//     tableOption[key] = tableConfig[key];
+//   });
+//   // tableOption.attr = tableConfig.attr;
+//   // tableOption.columnArr = tableConfig.columnArr;
+// };
 </script>
 
 <style lang="scss" scoped>
@@ -73,7 +235,8 @@ const saveFormHandler = (e: PageSchema) => {
   flex: 1; /* 左侧占据剩余空间 */
   padding: 16px;
   // background-color: map-get($bg-color, "page");
-  // border: 1px solid #d9d9d9;
+  border: 1px solid #d9d9d9;
+  overflow: hidden;
 }
 
 .right-panel {
@@ -82,11 +245,11 @@ const saveFormHandler = (e: PageSchema) => {
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
+  padding: 10px 0 10px 10px;
+  box-sizing: border-box;
 }
-
-.panel-content {
-  width: 100%; /* 面板内容宽度占满面板 */
-  padding: 16px;
+:deep(.el-scrollbar__wrap) {
+  padding-right: 10px;
 }
 
 .toggle-button {
