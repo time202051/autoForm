@@ -9,18 +9,8 @@
       <el-scrollbar height="100%">
         <!-- 直接修改相同数据源，无需保存 -->
         <PageConfig v-model="tableOption"></PageConfig>
-        <!-- <TableConfig @save="onSave"></TableConfig> -->
       </el-scrollbar>
     </div>
-
-    <!-- 按钮 -->
-    <!-- <el-button
-      class="toggle-button"
-      :style="{ left: isPanelOpen ? 'calc(100% - 400px - 40px)' : 'calc(100% - 40px)' }"
-      @click="togglePanel"
-    >
-      {{ isPanelOpen ? "隐藏" : "显示" }}
-    </el-button> -->
     <Teleport to="body">
       <div v-if="dialogVisible" class="modal">
         <EDesigner title="表单配置" @save="saveFormHandler">
@@ -45,6 +35,8 @@ import BaseTable from "@/components/BaseTable/src/BaseTable.vue";
 import type { TableType } from "@/components/BaseTable/index";
 // import TableConfig from "./src/TableConfig.vue";
 import PageConfig from "./src/PageConfig.vue";
+import { defaultTableAttr, defaultColumnAttr } from "@/views/projectConfig/src/pageConfig";
+import { cloneDeep } from "lodash-es";
 
 const ns = useNamespace("projectConfig");
 
@@ -84,31 +76,43 @@ const tableOption = reactive<TableType | any>({
     },
   ],
   loading: loading,
-  attr: {
-    border: true,
-    height: "100%",
-  },
+  attr: cloneDeep(defaultTableAttr),
   columnArr: [
     {
       attr: {
+        type: "index",
+        label: "#",
+      },
+    },
+    {
+      attr: {
+        type: "selection",
+      },
+    },
+    {
+      attr: {
+        ...cloneDeep(defaultColumnAttr),
         prop: "name",
         label: "姓名",
       },
     },
     {
       attr: {
+        ...cloneDeep(defaultColumnAttr),
         prop: "date",
         label: "日期",
       },
     },
     {
       attr: {
+        ...cloneDeep(defaultColumnAttr),
         prop: "address",
         label: "地址",
       },
     },
     {
       attr: {
+        ...cloneDeep(defaultColumnAttr),
         label: "操作",
       },
       defaultSlotConfig: [

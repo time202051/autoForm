@@ -6,6 +6,7 @@
       <el-tabs v-model="activeName" class="demo-tabs">
         <el-tab-pane label="属性" name="attrName">
           <el-collapse v-model="activeCollapse">
+            <!-- 基础属性配置 -->
             <el-collapse-item title="基础属性" name="basic">
               <el-form label-position="left" label-width="120px">
                 <el-form-item v-for="attr in tableAttrs" :key="attr.prop">
@@ -65,134 +66,69 @@
                 </el-form-item>
               </el-form>
             </el-collapse-item>
-            <!-- 基础属性配置 -->
-            <el-collapse-item title="基础属性" name="basic1">
-              <el-form label-position="left" label-width="100px">
-                <el-form-item label="边框">
-                  <el-switch v-model="tableConfig.attr.border" />
-                </el-form-item>
-                <el-form-item label="斑马纹">
-                  <el-switch v-model="tableConfig.attr.stripe" />
-                </el-form-item>
-                <el-form-item label="表格高度">
-                  <el-input v-model="tableConfig.attr.height" />
-                </el-form-item>
-                <el-form-item label="最大高度">
-                  <el-input v-model="tableConfig.attr.maxHeight" />
-                </el-form-item>
-                <el-form-item label="尺寸">
-                  <el-select v-model="tableConfig.attr.size">
-                    <el-option label="大" value="large" />
-                    <el-option label="默认" value="default" />
-                    <el-option label="小" value="small" />
-                  </el-select>
-                </el-form-item>
-              </el-form>
-            </el-collapse-item>
 
             <!-- 列配置 -->
             <el-collapse-item title="列配置" name="columns">
+              <CollapsibleCard
+                v-for="(column, index) in tableConfig.columnArr"
+                :key="index"
+                @close="removeColumn(index)"
+              >
+                <template #header>
+                  <span>列 {{ index + 1 }}</span>
+                </template>
+                <AttrConfigForm :attrs="tableColumnAttrs" v-model="column.attr"></AttrConfigForm>
+                <!-- 操作列配置 -->
+                column.attr.prop:{{ column.attr.prop }}
+                <template v-if="!column.attr.prop">
+                  <el-divider>操作按钮配置</el-divider>
+                  <div class="action-buttons">
+                    <el-button type="primary" size="small" @click="addActionButton(column)">
+                      添加按钮
+                    </el-button>
+                  </div>
+                  <div v-if="column.defaultSlotConfig" class="button-list">
+                    <el-card
+                      v-for="(btn, btnIndex) in column.defaultSlotConfig"
+                      :key="btnIndex"
+                      class="button-item"
+                    >
+                      <el-form>
+                        <el-form-item label="按钮文本">
+                          <el-input v-model="btn.content.text" />
+                        </el-form-item>
+                        <el-form-item label="按钮类型">
+                          <el-select v-model="btn.attr.type">
+                            <el-option label="主要" value="primary" />
+                            <el-option label="成功" value="success" />
+                            <el-option label="警告" value="warning" />
+                            <el-option label="危险" value="danger" />
+                            <el-option label="信息" value="info" />
+                          </el-select>
+                        </el-form-item>
+                        <el-form-item label="点击事件">
+                          <el-input
+                            type="textarea"
+                            v-model="btn.eventCode"
+                            placeholder="输入事件处理代码"
+                            @change="updateButtonEvent(column, btnIndex)"
+                          />
+                        </el-form-item>
+                      </el-form>
+                      <el-button
+                        type="danger"
+                        size="small"
+                        @click="removeActionButton(column, btnIndex)"
+                      >
+                        删除按钮
+                      </el-button>
+                    </el-card>
+                  </div>
+                </template>
+              </CollapsibleCard>
               <div class="column-tools">
                 <el-button type="primary" @click="addColumn">添加列</el-button>
               </div>
-
-              <el-card
-                v-for="(column, index) in tableConfig.columnArr"
-                :key="index"
-                class="column-card"
-              >
-                <template #header>
-                  <div class="column-header">
-                    <span>列 {{ index + 1 }}</span>
-                    <el-button type="danger" size="small" @click="removeColumn(index)">
-                      删除
-                    </el-button>
-                  </div>
-                </template>
-
-                <el-form label-position="left" label-width="100px">
-                  <el-form-item label="字段名">
-                    <el-input v-model="column.attr.prop" />
-                  </el-form-item>
-                  <el-form-item label="列标题">
-                    <el-input v-model="column.attr.label" />
-                  </el-form-item>
-                  <el-form-item label="宽度">
-                    <el-input v-model="column.attr.width" />
-                  </el-form-item>
-                  <el-form-item label="固定列">
-                    <el-select v-model="column.attr.fixed">
-                      <el-option label="不固定" value="" />
-                      <el-option label="左固定" value="left" />
-                      <el-option label="右固定" value="right" />
-                    </el-select>
-                  </el-form-item>
-                  <el-form-item label="对齐方式">
-                    <el-select v-model="column.attr.align">
-                      <el-option label="左对齐" value="left" />
-                      <el-option label="居中" value="center" />
-                      <el-option label="右对齐" value="right" />
-                    </el-select>
-                  </el-form-item>
-                  <el-form-item label="列类型">
-                    <el-select v-model="column.attr.type">
-                      <el-option label="普通列" value="" />
-                      <el-option label="序号列" value="index" />
-                      <el-option label="选择列" value="selection" />
-                    </el-select>
-                  </el-form-item>
-                  <el-form-item label="排序">
-                    <el-switch v-model="column.attr.sortable" />
-                  </el-form-item>
-
-                  <!-- 操作列配置 -->
-                  <template v-if="!column.attr.prop">
-                    <el-divider>操作按钮配置</el-divider>
-                    <div class="action-buttons">
-                      <el-button type="primary" size="small" @click="addActionButton(column)">
-                        添加按钮
-                      </el-button>
-                    </div>
-                    <div v-if="column.defaultSlotConfig" class="button-list">
-                      <el-card
-                        v-for="(btn, btnIndex) in column.defaultSlotConfig"
-                        :key="btnIndex"
-                        class="button-item"
-                      >
-                        <el-form>
-                          <el-form-item label="按钮文本">
-                            <el-input v-model="btn.content.text" />
-                          </el-form-item>
-                          <el-form-item label="按钮类型">
-                            <el-select v-model="btn.attr.type">
-                              <el-option label="主要" value="primary" />
-                              <el-option label="成功" value="success" />
-                              <el-option label="警告" value="warning" />
-                              <el-option label="危险" value="danger" />
-                              <el-option label="信息" value="info" />
-                            </el-select>
-                          </el-form-item>
-                          <el-form-item label="点击事件">
-                            <el-input
-                              type="textarea"
-                              v-model="btn.eventCode"
-                              placeholder="输入事件处理代码"
-                              @change="updateButtonEvent(column, btnIndex)"
-                            />
-                          </el-form-item>
-                        </el-form>
-                        <el-button
-                          type="danger"
-                          size="small"
-                          @click="removeActionButton(column, btnIndex)"
-                        >
-                          删除按钮
-                        </el-button>
-                      </el-card>
-                    </div>
-                  </template>
-                </el-form>
-              </el-card>
             </el-collapse-item>
           </el-collapse>
         </el-tab-pane>
@@ -282,12 +218,17 @@ import { cloneDeep } from "lodash";
 import "codemirror/mode/javascript/javascript.js";
 import type { Editor, EditorConfiguration } from "codemirror";
 import { CmComponentRef } from "codemirror-editor-vue3";
-import type { TableParams, IEventParams, TableAttrConfig } from "./pageConfig";
-import { tableAttrs } from "./pageConfig";
 import { Close } from "@element-plus/icons-vue";
 import { useResizable } from "@/hooks";
 import { useVModel } from "@vueuse/core";
-
+import CollapsibleCard from "@/views/projectConfig/com/CollapsibleCard.vue";
+import AttrConfigForm from "@/views/projectConfig/com/AttrConfigForm.vue";
+import type {
+  TableParams,
+  IEventParams,
+  TableAttrConfig,
+} from "@/views/projectConfig/src/pageConfig.ts"; // 引入类型定义
+import { tableColumnAttrs, tableAttrs } from "@/views/projectConfig/src/pageConfig"; // 引入类型定义
 const props = withDefaults(
   defineProps<{
     modelValue: any;
@@ -302,7 +243,13 @@ const props = withDefaults(
 const emit = defineEmits(["update:modelValue", "save"]);
 
 const tableConfig = useVModel(props, "modelValue", emit);
-
+// watch(
+//   tableConfig.value,
+//   (newValue) => {
+//     emit("update:modelValue", newValue);
+//   },
+//   { deep: true }
+// );
 // const tableConfig = defineModel({
 //   default: () =>
 //     reactive({
@@ -332,7 +279,7 @@ console.log(123, tableConfig);
 // });
 
 // 折叠面板激活项
-const activeCollapse = ref(["basic", "columns", "events"]);
+const activeCollapse = ref(["basic"]);
 
 const activeName = ref("attrName");
 
@@ -397,7 +344,7 @@ const addActionButton = (column: any) => {
     comp: "ElButton",
     attr: {
       type: "primary",
-      size: "small",
+      // size: "small",
     },
     content: {
       text: "按钮",
@@ -494,6 +441,14 @@ const saveEditor = (eventName: string) => {
 const updateTableEvent = (eventName: string, codeVal?: string) => {
   const val = codeVal || cmComponentRef?.value.cminstance.getValue();
   console.log("更新表格事件", eventName, val);
+
+  // 如果 codeVal 没有值，删除 eventConfigs 中的事件
+  if (!val) {
+    delete tableConfig.value.eventConfigs[eventName];
+    delete tableConfig.value.event[eventName];
+    return;
+  }
+
   try {
     tableConfig.value.event[eventName] = (...args: any[]) => {
       const e: IEventParams = {
@@ -750,5 +705,9 @@ defineExpose({
   :deep(.el-tooltip__trigger) {
     cursor: help;
   }
+}
+
+:deep(.el-collapse-item__content) {
+  padding: 10px 0;
 }
 </style>
