@@ -7,14 +7,16 @@
  * @remark:
 !-->
 <template>
+  <!-- :ref="tableOption.ref" -->
   <el-table
     v-loading="loading"
     :data="data"
-    :ref="tableOption.ref"
+    ref="tableRef"
     v-bind="tableOption.attr"
-    v-on="tableOption.event || {}"
+    v-on="bindEvents"
     :class="[ns.b()]"
   >
+    <!-- v-on="tableOption.event || {}" -->
     <!-- 不attr.type切换时候不生效可能得重新加载 -->
 
     <el-table-column
@@ -187,6 +189,34 @@ const defaultSlotConfigHandle = function (config: CompType) {
     ref,
   };
 };
+
+const instance = getCurrentInstance();
+const tableRef = ref();
+const bindEvents = computed(() => {
+  if (!props.tableOption.event) return {};
+
+  const events = {};
+  Object.entries(props.tableOption.event).forEach(([key, fn]) => {
+    events[key] = (...args: any) => {
+      try {
+        if (!instance?.proxy) {
+          console.warn("组件实例未找到");
+          return;
+        }
+        if (!tableRef.value) {
+          console.warn("表格实例未找到");
+          return;
+        }
+        // 直接执行函数，不需要二次调用
+        return fn(args, instance.proxy, tableRef.value);
+      } catch (error: any) {
+        console.error(`事件 ${key} 执行出错:`, error);
+        ElMessage.error(`事件执行出错: ${error?.message}`);
+      }
+    };
+  });
+  return events;
+});
 </script>
 
 <style scoped lang="less"></style>

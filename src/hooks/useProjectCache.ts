@@ -72,17 +72,33 @@ function createProjectCache() {
     // 还原事件函数
     pageConfig.event = {};
     Object.keys(pageConfig.eventConfigs).forEach((eventName) => {
-      pageConfig.event[eventName] = (...args: any) => {
-        const e: IEventParams = {
-          args,
-          state: {
-            tableConfig: pageConfig,
-          },
-          ctx
-        };
-        return new Function('e', pageConfig.eventConfigs[eventName])(e);
-      }
+      pageConfig.event[eventName] = (args: any, instance: any, tableRef: any) => {
+        try {
+          const context = {
+            ...args,
+            utils: {
+              message: ElMessage,
+              // ... 其他工具函数
+            },
+            state: {
+              tableConfig: instance.tableOption,
+            },
+            instance,
+            tableRef,
+          };
+
+          return new Function('context', 'args', `
+            with(context) {
+              ${pageConfig.eventConfigs[eventName]}
+            }
+          `)(context, arguments);
+        } catch (error: any) {
+          console.error(`事件 ${eventName} 执行出错:`, error);
+          ElMessage.error(`事件执行出错: ${error?.message}`);
+        }
+      };
     });
+
 
     // 处理列事件
     if (pageConfig.columnArr && pageConfig.columnArr.length > 0) {

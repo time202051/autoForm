@@ -41,7 +41,7 @@ export interface IEventParams {
     tableConfig: any
   },
   methods?: any// 页面方法
-  ctx?: ComponentInternalInstance// 当前组件实例
+  ctx?: ComponentInternalInstance | any// 当前组件实例
 }
 
 

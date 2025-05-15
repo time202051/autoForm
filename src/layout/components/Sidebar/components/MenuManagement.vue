@@ -85,15 +85,18 @@ const isEditing = ref(false);
 const parentMenu = ref<any>(null); // 用于存储父菜单
 
 //获取缓存的路由数据
-onMounted(() => {
-  menus.value = permissionStore.dynamicMenus;
+onMounted(async () => {
+  // 从缓存中读取菜单数据
+  const cacheMenu = await projectCache.getMenuTree();
+  if (cacheMenu) {
+    menus.value = cacheMenu;
+  }
 });
 
 // 打开菜单编辑对话框
 const openMenuDialog = (menu: any, isSon: boolean) => {
   if (menu) {
     // 编辑现有菜单
-
     currentMenu.value = { ...cloneDeep(menu) }; // 确保 path 被正确绑定
     isEditing.value = true;
   } else {
