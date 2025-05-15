@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { v4 as uuidv4 } from 'uuid';
+import { useStorage } from '@vueuse/core';
+import { useProjectCache } from "@/hooks";
 
 // 定义项目类型
 interface Project {
@@ -8,43 +9,75 @@ interface Project {
   description: string;
   address: string;
 }
+export const useProjectStore = defineStore('project', () => {
+  // 项目列表
+  const projects = useStorage<Project[]>('project-store-projects', []);
 
-// 定义 store
-export const useProjectStore = defineStore('project', {
-  state: () => ({
-    projects: [] as Project[], // 项目列表
-  }),
-  actions: {
-    /**
-     * 添加项目
-     * @param project - 项目对象
-     */
-    addProject(project: Omit<Project, 'id'>) {
-      this.projects.push({
-        id: uuidv4(), // 生成唯一 ID
-        ...project,
-      });
-    },
+  // 当前选中的项目数据
+  const selectedProject = useStorage<any>('project-store-selected-project', {});
 
-    /**
-     * 删除项目
-     * @param id - 项目 ID
-     */
-    deleteProject(id: string) {
-      this.projects = this.projects.filter((project) => project.id !== id);
-    },
+  /**
+   * 添加项目
+   * @param project - 项目对象
+   */
+  const addProject = (project: Project) => {
+    projects.value.push({
+      ...project,
+    });
+  };
 
-    /**
-     * 更新项目
-     * @param id - 项目 ID
-     * @param updatedProject - 更新后的项目对象
-     */
-    updateProject(id: string, updatedProject: Partial<Project>) {
-      const project = this.projects.find((project) => project.id === id);
-      if (project) {
-        Object.assign(project, updatedProject);
+  /**
+   * 删除项目
+   * @param id - 项目 ID
+   */
+  const deleteProject = (id: string) => {
+    const projectCache = useProjectCache();
+    projects.value = projects.value.filter((project) => project.id !== id);
+    // 如果删除的是当前选中的项目，清空选中状态
+    if (selectedProject.value?.id === id) {
+      selectedProject.value = null;
+    }
+    projectCache.deleteProject(id)
+  };
+
+  /**
+   * 更新项目
+   * @param id - 项目 ID
+   * @param updatedProject - 更新后的项目对象
+   */
+  const updateProject = (id: string, updatedProject: Partial<Project>) => {
+    const project = projects.value.find((project) => project.id === id);
+    if (project) {
+      Object.assign(project, updatedProject);
+      // 如果更新的是当前选中的项目，同步更新 selectedProject
+      if (selectedProject.value?.id === id) {
+        selectedProject.value = { ...selectedProject.value, ...updatedProject };
       }
-    },
-  },
-  persist: true, // 启用持久化
+    }
+  };
+
+  /**
+   * 选中项目
+   * @param project - 项目对象
+   */
+  const selectProject = (project: Project) => {
+    selectedProject.value = project;
+  };
+
+  /**
+   * 获取当前选中的项目
+   */
+  const getSelectedProject = () => {
+    return selectedProject.value;
+  };
+
+  return {
+    projects,
+    selectedProject,
+    addProject,
+    deleteProject,
+    updateProject,
+    selectProject,
+    getSelectedProject,
+  };
 });

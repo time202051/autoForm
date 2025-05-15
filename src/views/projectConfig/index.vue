@@ -2,7 +2,8 @@
   <div :class="ns.b()">
     <!-- 左侧内容 -->
     <div class="left-content">
-      <BaseTable :tableOption></BaseTable>
+      <!-- <BaseTable v-model="tableOption"></BaseTable> -->
+      <BaseTable :tableOption ref="tableRef"></BaseTable>
     </div>
     <!-- 右侧面板 -->
     <div class="right-panel" v-show="isPanelOpen">
@@ -37,8 +38,14 @@ import type { TableType } from "@/components/BaseTable/index";
 import PageConfig from "./src/PageConfig.vue";
 import { defaultTableAttr, defaultColumnAttr } from "@/views/projectConfig/src/pageConfig";
 import { cloneDeep } from "lodash-es";
+import { useProjectCache } from "@/hooks";
+const { getPageData } = useProjectCache();
 
 const ns = useNamespace("projectConfig");
+const tableRef = ref<any>();
+onMounted(() => {
+  console.log("tableRef", tableRef.value);
+});
 
 const isPanelOpen = ref(true); // 控制面板展开状态
 
@@ -126,11 +133,13 @@ const tableOption = reactive<TableType | any>({
           },
           event: {
             click: (e: any) => {
+              console.log(444, e);
               e.row.name = "张三";
               console.log("点击了", e);
               dialogVisible.value = true;
             },
           },
+          eventConfigs: {},
         },
         {
           comp: "ElButton",
@@ -147,6 +156,7 @@ const tableOption = reactive<TableType | any>({
               console.log("tableOption", tableOption);
             },
           },
+          eventConfigs: {},
         },
       ],
     },
@@ -208,9 +218,19 @@ const tableOption = reactive<TableType | any>({
   eventConfigs: {},
 });
 
+const init = async () => {
+  const data = await getPageData();
+  if (data) {
+    Object.keys(tableOption).forEach((key) => {
+      tableOption[key] = data[key];
+    });
+    console.log("indexDB获取并更新数据", data, tableOption);
+  }
+};
+init();
+
 const saveFormHandler = (e: PageSchema) => {
   dialogVisible.value = false;
-  console.log("888", e);
 };
 
 // const onSave = (data: any) => {

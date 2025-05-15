@@ -99,6 +99,9 @@ const fetchData = () => {
   });
   // 在这里调用 API 获取数据，并更新表格和 total
 };
+defineExpose({
+  tableOption: props.tableOption,
+});
 </script>
 
 <style lang="scss" scoped>

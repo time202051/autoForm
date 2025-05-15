@@ -60,9 +60,11 @@ import { v4 as uuidv4 } from "uuid"; // 引入 uuid 库
 import { usePermissionStore } from "@/store";
 import { cloneDeep } from "lodash";
 import type { RouteRecordRaw } from "vue-router";
+import { useProjectCache } from "@/hooks";
 
 const emit = defineEmits(["save", "cancel"]);
 const permissionStore = usePermissionStore();
+const projectCache = useProjectCache();
 
 const router = useRouter();
 const menus = ref<any[]>([]);
@@ -95,7 +97,7 @@ const openMenuDialog = (menu: any, isSon: boolean) => {
     currentMenu.value = { ...cloneDeep(menu) }; // 确保 path 被正确绑定
     isEditing.value = true;
   } else {
-    const id = uuidv4();
+    const id = `page-${uuidv4()}`;
     // 添加新菜单
     currentMenu.value = {
       id,
@@ -184,17 +186,12 @@ const removeMenu = async (node: any, data: any) => {
 
 // 保存菜单并更新路由
 const save = async () => {
+  projectCache.saveMenuTree(menus.value);
   const routerTemp = permissionStore.generateRoutesLowCode(menus.value);
   permissionStore.resetRouter();
   const dynamicRoutes = await permissionStore.generateRoutesData(routerTemp);
-  console.log("333333", dynamicRoutes);
   dynamicRoutes.forEach((route: RouteRecordRaw) => router.addRoute(route));
   permissionStore.saveDynamicMenus(menus.value);
-
-  setTimeout(() => {
-    console.log(444, router.getRoutes());
-  });
-
   emit("cancel");
 };
 </script>

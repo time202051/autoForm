@@ -79,7 +79,7 @@
                 </template>
                 <AttrConfigForm :attrs="tableColumnAttrs" v-model="column.attr"></AttrConfigForm>
                 <!-- 操作列配置 -->
-                column.attr.prop:{{ column.attr.prop }}
+                column.attr.prop:{{ !column.attr.prop }}
                 <template v-if="!column.attr.prop">
                   <el-divider>操作按钮配置</el-divider>
                   <div class="action-buttons">
@@ -109,7 +109,7 @@
                         <el-form-item label="点击事件">
                           <el-input
                             type="textarea"
-                            v-model="btn.eventCode"
+                            v-model="btn.eventConfigs['click']"
                             placeholder="输入事件处理代码"
                             @change="updateButtonEvent(column, btnIndex)"
                           />
@@ -150,6 +150,7 @@
           </div>
         </el-tab-pane>
       </el-tabs>
+      <SaveCurrentPage class="save-btn" :tableConfig></SaveCurrentPage>
     </div>
     <!-- dialog会影响内部代码编辑器的样式，才通过这种方式手撸弹框，支持拖拽缩放 -->
     <Teleport to="body">
@@ -223,6 +224,7 @@ import { useResizable } from "@/hooks";
 import { useVModel } from "@vueuse/core";
 import CollapsibleCard from "@/views/projectConfig/com/CollapsibleCard.vue";
 import AttrConfigForm from "@/views/projectConfig/com/AttrConfigForm.vue";
+import SaveCurrentPage from "@/views/projectConfig/com/SaveCurrentPage.vue";
 import type {
   TableParams,
   IEventParams,
@@ -260,7 +262,6 @@ const tableConfig = useVModel(props, "modelValue", emit);
 //       eventConfigs: {},
 //     }),
 // });
-console.log(123, tableConfig);
 
 // 表格配置
 // const tableConfig = reactive<TableType>({
@@ -349,7 +350,7 @@ const addActionButton = (column: any) => {
     content: {
       text: "按钮",
     },
-    eventCode: "", // 存储事件代码
+    eventConfigs: {}, // 存储事件代码
     event: {},
   });
 };
@@ -368,33 +369,24 @@ const updateButtonEvent = (column: any, btnIndex: number) => {
   try {
     // 创建事件处理函数
     btn.event = {
-      click: (scope: any) => {
+      click: (...args: any) => {
         // 创建一个统一的参数对象，包含所有可能用到的参数和方法
-        const e: TableParams = {
+        const e: IEventParams = {
+          args,
           // 基础数据
-          scope, // 原始 scope 对象
-          row: scope.row, // 当前行数据
-          index: scope.$index, // 当前行索引
-          column: scope.column, // 当前列信息
+          // scope, // 原始 scope 对象
+          // row: scope.row, // 当前行数据
+          // index: scope.$index, // 当前行索引
+          // column: scope.column, // 当前列信息
           // 页面状态
           state: {
             tableConfig: tableConfig,
             // eventConfigs, // 事件配置
           },
-          // 页面方法
-          methods: {
-            addColumn, // 添加列方法
-            removeColumn, // 删除列方法
-            addActionButton, // 添加按钮方法
-            removeActionButton, // 删除按钮方法
-            updateTableEvent, // 更新表格事件方法
-            // onSubmit, // 提交方法
-          },
         };
 
         // 使用 Function 构造函数创建新的函数，只传入一个参数
-        const fn = new Function("e", btn.eventCode);
-
+        const fn = new Function("e", btn.eventConfigs["click"]); //默认一定是click，后面再扩展其他的
         // 执行函数，传入统一的参数对象
         return fn(e);
       },
@@ -513,7 +505,12 @@ defineExpose({
     // padding: 20px;
     // border-left: 1px solid #dcdfe6;
     // background-color: #f5f7fa;
-
+    position: relative;
+    .save-btn {
+      position: absolute;
+      right: 0px;
+      top: 0px;
+    }
     .column-tools {
       margin-bottom: 16px;
     }

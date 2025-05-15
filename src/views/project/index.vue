@@ -27,7 +27,7 @@
             :icon="Delete"
             type="danger"
             circle
-            @click.stop="deleteProject(project.id)"
+            @click.stop="deleteProject(project)"
           ></el-button>
         </div>
       </el-card>
@@ -65,6 +65,7 @@ import { useRouter } from "vue-router";
 import { useProjectStore } from "@/store";
 import { Edit, Delete } from "@element-plus/icons-vue";
 import dayjs from "dayjs";
+
 const projectStore = useProjectStore();
 const router = useRouter();
 
@@ -114,13 +115,27 @@ const saveProject = () => {
 };
 
 // 删除项目
-const deleteProject = (id) => {
-  projectStore.deleteProject(id);
+const deleteProject = (project) => {
+  const { id, name } = project;
+  ElMessageBox.confirm(`确定要删除【${name}】项目吗？删除后数据无法恢复！！！`, "删除确认", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      projectStore.deleteProject(project.id);
+    })
+    .catch(() => {
+      ElMessage.info("已取消删除");
+    });
 };
 
 // 跳转到 dashboard 页面
 const goToDashboard = (project) => {
   const { key } = project;
+  console.time("selectProject"); // 开始计时
+  projectStore.selectProject(project);
+  console.timeEnd("selectProject");
   router.push({ path: `projectConfig/${key}` });
 };
 </script>

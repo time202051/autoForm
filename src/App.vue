@@ -16,13 +16,14 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useSettingsStore } from "@/store";
+import { useAppStore, useSettingsStore, useProjectStore } from "@/store";
 import defaultSettings from "@/settings";
 import { ThemeMode } from "@/enums/settings/theme.enum";
 import { ComponentSize } from "@/enums/settings/layout.enum";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
+const projectStore = useProjectStore(); //确保被初始化
 
 const locale = computed(() => appStore.locale);
 const size = computed(() => appStore.size as ComponentSize);

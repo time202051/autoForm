@@ -113,6 +113,7 @@ declare global {
     key?: string;
     attr?: Recordable;
     event?: Recordable;
+    eventConfigs?: any;
     ref?: Ref<T>;
   }
 
@@ -122,6 +123,7 @@ declare global {
     key?: string;
     attr?: Recordable;
     event?: Recordable;
+    eventConfigs?: any;
     content?: CompContentType;
     children?: Array<CompType> | [];
     ref?: Ref<T>;

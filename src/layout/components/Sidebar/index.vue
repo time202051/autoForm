@@ -23,13 +23,12 @@
 <script setup lang="ts">
 import { LayoutMode } from "@/enums/settings/layout.enum";
 import { useSettingsStore, usePermissionStore, useAppStore } from "@/store";
-
 import NavbarRight from "../NavBar/components/NavbarRight.vue";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 const permissionStore = usePermissionStore();
-
+permissionStore.initMenu(); //初始化菜单，直接从缓存中获取
 const sidebarLogo = computed(() => settingsStore.sidebarLogo);
 const layout = computed(() => settingsStore.layout);
 

@@ -13,9 +13,10 @@
     :ref="tableOption.ref"
     v-bind="tableOption.attr"
     v-on="tableOption.event || {}"
-    v-el-table-infinite-scroll="load"
     :class="[ns.b()]"
   >
+    <!-- 不attr.type切换时候不生效可能得重新加载 -->
+
     <el-table-column
       v-for="(tableColumn, index) of tableOption.columnArr"
       :key="setKey(index, tableColumn.attr?.label)"
@@ -34,17 +35,23 @@
         v-if="tableColumn.defaultSlotName || tableColumn.defaultSlotConfig"
       >
         <BasicComponent
-          v-if="tableColumn.defaultSlotConfig && typeof tableColumn.defaultSlotConfig === 'object'"
           :elementOption="defaultSlotConfigHandle(tableColumn.defaultSlotConfig as CompType)"
+          v-if="tableColumn.defaultSlotConfig && typeof tableColumn.defaultSlotConfig === 'object'"
           v-model="scope.row[tableColumn.attr?.prop]"
           v-on="eventHandle(scope, tableColumn.defaultSlotConfig as CompType) || {}"
         />
-        <BasicComponent
+        <template
           v-if="tableColumn.defaultSlotConfig && Array.isArray(tableColumn.defaultSlotConfig)"
-          v-for="config of tableColumn.defaultSlotConfig"
-          :elementOption="defaultSlotConfigHandle(config as CompType)"
-          v-on="eventHandle(scope, config as CompType) || {}"
-        />
+        >
+          <template v-for="(config, index) in tableColumn.defaultSlotConfig" :key="index">
+            <BasicComponent
+              :elementOption="defaultSlotConfigHandle(config as CompType)"
+              v-on="eventHandle(scope, tableColumn.defaultSlotConfig[index] as CompType) || {}"
+            />
+            <!-- v-model:elementOption="tableColumn.defaultSlotConfig[index]" -->
+          </template>
+        </template>
+
         <slot
           v-if="tableColumn.defaultSlotName"
           :name="tableColumn.defaultSlotName"
@@ -71,28 +78,37 @@
 
 <script setup lang="ts">
 import type { TableType } from "@/components/BaseTable/index";
-import { ref, watch, onBeforeMount } from "vue";
+import { ref, watch } from "vue";
 import { ElTable, ElTableColumn } from "element-plus";
 import BasicComponent from "./BasicComponent.vue";
-import { default as vElTableInfiniteScroll } from "el-table-infinite-scroll";
 import { useNamespace } from "@/hooks/useNamespace";
+import { useVModel } from "@vueuse/core";
 const ns = useNamespace("table");
 
 const props = defineProps<{
   tableOption: TableType;
 }>();
 
-onBeforeMount(() => {
-  if (props.tableOption.loading) {
-    loading.value = props.tableOption.loading.value;
-  }
-});
+// const emit = defineEmits(["update:tableOption"]);
 
-const data: any = ref([]);
+// const tableOption = useVModel(props, "tableOption", emit);
+
+// onBeforeMount(() => {
+//   if (props.tableOption.loading) {
+//     loading.value = props.tableOption.loading.value;
+//   }
+// });
+
+const data = computed({
+  get: () => props.tableOption.data,
+  set: (value) => {
+    props.tableOption.data = value;
+  },
+});
 watch(
-  () => props.tableOption.data,
-  () => {
-    data.value = props.tableOption.data;
+  () => props.tableOption,
+  (n) => {
+    console.log("表格参数变化", n);
   },
   {
     immediate: true,
@@ -100,16 +116,28 @@ watch(
   }
 );
 
+// const data: any = ref([]);
+// watch(
+//   () => props.tableOption.data,
+//   () => {
+//     data.value = props.tableOption.data;
+//   },
+//   {
+//     immediate: true,
+//     deep: true,
+//   }
+// );
+
 const loading = ref(false);
-watch(
-  () => props.tableOption.loading,
-  () => {
-    if (props.tableOption.loading) {
-      loading.value = props.tableOption.loading.value;
-    }
-  },
-  { deep: true }
-);
+// watch(
+//   () => props.tableOption.loading,
+//   () => {
+//     if (props.tableOption.loading) {
+//       loading.value = props.tableOption.loading.value;
+//     }
+//   },
+//   { deep: true }
+// );
 
 /**
  * 设置表格列的 key 值
@@ -147,6 +175,7 @@ const eventHandle = function (currentCellData: any, config: any) {
  * @return Object 除去事件对象的当前列配置对象
  */
 const defaultSlotConfigHandle = function (config: CompType) {
+  console.log("元组件接收到的配置", config);
   const { comp, data, key, attr, content, children, ref } = config;
   return {
     comp,
@@ -157,11 +186,6 @@ const defaultSlotConfigHandle = function (config: CompType) {
     children,
     ref,
   };
-};
-
-const emit = defineEmits(["load"]);
-const load = () => {
-  emit("load", data);
 };
 </script>
 

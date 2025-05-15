@@ -29,7 +29,7 @@ export interface TableParams {
   index: number; // 当前行索引
   column: any; // 当前列信息
   state: TableState; // 页面状态
-  methods: TableMethods; // 页面方法
+  methods?: TableMethods; // 页面方法
 }
 
 
@@ -40,8 +40,8 @@ export interface IEventParams {
   state: {
     tableConfig: any
   },
-  methods: any// 页面方法
-  ctx: ComponentInternalInstance// 当前组件实例
+  methods?: any// 页面方法
+  ctx?: ComponentInternalInstance// 当前组件实例
 }
 
 

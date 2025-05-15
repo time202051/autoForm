@@ -2,6 +2,7 @@ import type { RouteRecordRaw } from "vue-router";
 import { constantRoutes } from "@/router";
 import { store } from "@/store";
 import router from "@/router";
+import { useProjectCache } from '@/hooks'
 
 import MenuAPI, { type RouteVO } from "@/api/system/menu.api";
 const modules = import.meta.glob("../../views/**/**.vue");
@@ -17,7 +18,7 @@ export const usePermissionStore = defineStore(
     // 路由是否加载完成
     const isRoutesLoaded = ref(false);
     const dynamicMenus = ref<RouteRecordRaw[]>([]);
-
+    const projectCache = useProjectCache()
     function saveDynamicMenus(menus: any[]) {
       dynamicMenus.value = menus;
     }
@@ -126,6 +127,23 @@ export const usePermissionStore = defineStore(
       });
     };
 
+
+    // 设置化菜单（无参数缓存中获取）
+    const initMenu = async (menus?: any) => {
+      if (!menus) {
+        const cacheMenu = await projectCache.getMenuTree();
+        console.log('缓存的菜单', cacheMenu);
+        menus = cacheMenu
+      }
+      // 获取菜单数据
+      const routerTemp = generateRoutesLowCode(menus);
+      resetRouter();
+      const dynamicRoutes = await generateRoutesData(routerTemp);
+      console.log("promission=》initMenu", routerTemp, dynamicRoutes);
+      dynamicRoutes.forEach((route: RouteRecordRaw) => router.addRoute(route));
+      saveDynamicMenus(menus);
+    }
+
     return {
       routes,
       mixedLayoutLeftRoutes,
@@ -137,6 +155,7 @@ export const usePermissionStore = defineStore(
       resetRouter,
       generateRoutesLowCode,
       saveDynamicMenus,
+      initMenu
     };
   },
   {
