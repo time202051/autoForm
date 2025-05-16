@@ -48,8 +48,11 @@
           <template v-for="(config, index) in tableColumn.defaultSlotConfig" :key="index">
             <BasicComponent
               :elementOption="defaultSlotConfigHandle(config as CompType)"
-              v-on="eventHandle(scope, tableColumn.defaultSlotConfig[index] as CompType) || {}"
+              v-on="
+                bindEventsHandler(scope, tableColumn.defaultSlotConfig[index] as CompType) || {}
+              "
             />
+            <!-- <BasicComponent :elementOption="config" /> -->
             <!-- v-model:elementOption="tableColumn.defaultSlotConfig[index]" -->
           </template>
         </template>
@@ -80,13 +83,12 @@
 
 <script setup lang="ts">
 import type { TableType } from "@/components/BaseTable/index";
-import { ref, watch } from "vue";
+import { ref, useTemplateRef } from "vue";
 import { ElTable, ElTableColumn } from "element-plus";
 import BasicComponent from "./BasicComponent.vue";
 import { useNamespace } from "@/hooks/useNamespace";
 import { useVModel } from "@vueuse/core";
 const ns = useNamespace("table");
-
 const props = defineProps<{
   tableOption: TableType;
 }>();
@@ -107,16 +109,16 @@ const data = computed({
     props.tableOption.data = value;
   },
 });
-watch(
-  () => props.tableOption,
-  (n) => {
-    console.log("表格参数变化", n);
-  },
-  {
-    immediate: true,
-    deep: true,
-  }
-);
+// watch(
+//   () => props.tableOption,
+//   (n) => {
+//     console.log("表格参数变化", n);
+//   },
+//   {
+//     immediate: true,
+//     deep: true,
+//   }
+// );
 
 // const data: any = ref([]);
 // watch(
@@ -177,8 +179,7 @@ const eventHandle = function (currentCellData: any, config: any) {
  * @return Object 除去事件对象的当前列配置对象
  */
 const defaultSlotConfigHandle = function (config: CompType) {
-  console.log("元组件接收到的配置", config);
-  const { comp, data, key, attr, content, children, ref } = config;
+  const { comp, data, key, attr, content, children, ref, event, eventConfigs } = config;
   return {
     comp,
     data,
@@ -187,28 +188,25 @@ const defaultSlotConfigHandle = function (config: CompType) {
     content,
     children,
     ref,
+    event,
+    eventConfigs,
   };
 };
 
 const instance = getCurrentInstance();
-const tableRef = ref();
+const tableRef = useTemplateRef("tableRef");
+const baseTableInstance = inject("baseTable");
+defineExpose({
+  tableRef,
+  instance,
+});
 const bindEvents = computed(() => {
   if (!props.tableOption.event) return {};
-
-  const events = {};
+  const events: any = {};
   Object.entries(props.tableOption.event).forEach(([key, fn]) => {
     events[key] = (...args: any) => {
       try {
-        if (!instance?.proxy) {
-          console.warn("组件实例未找到");
-          return;
-        }
-        if (!tableRef.value) {
-          console.warn("表格实例未找到");
-          return;
-        }
-        // 直接执行函数，不需要二次调用
-        return fn(args, instance.proxy, tableRef.value);
+        return fn(args, baseTableInstance);
       } catch (error: any) {
         console.error(`事件 ${key} 执行出错:`, error);
         ElMessage.error(`事件执行出错: ${error?.message}`);
@@ -217,6 +215,24 @@ const bindEvents = computed(() => {
   });
   return events;
 });
+const bindEventsHandler = (scope: any, config: any) => {
+  if (!config.event) return {};
+  const events: any = {};
+  Object.entries(config.event).forEach(([key, fn]) => {
+    events[key] = ($event: any, ...args: any) => {
+      try {
+        // 防止冒泡
+        $event.stopPropagation();
+        if (!args) args = [$event];
+        return fn(args, scope, baseTableInstance);
+      } catch (error: any) {
+        console.error(`事件 ${key} 执行出错:`, error);
+        ElMessage.error(`事件执行出错: ${error?.message}`);
+      }
+    };
+  });
+  return events;
+};
 </script>
 
 <style scoped lang="less"></style>

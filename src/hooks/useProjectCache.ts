@@ -8,6 +8,7 @@ import { ElMessage } from 'element-plus';
 import type {
   IEventParams,
 } from "@/views/projectConfig/src/pageConfig.ts";
+import { eventHandler } from "@/utils/eventHandler";
 
 // 基础菜单数据结构
 interface IBaseMenuData {
@@ -71,55 +72,41 @@ function createProjectCache() {
 
     // 还原事件函数
     pageConfig.event = {};
-    Object.keys(pageConfig.eventConfigs).forEach((eventName) => {
-      pageConfig.event[eventName] = (args: any, instance: any, tableRef: any) => {
-        try {
-          const context = {
-            ...args,
-            utils: {
-              message: ElMessage,
-              // ... 其他工具函数
-            },
-            state: {
-              tableConfig: instance.tableOption,
-            },
-            instance,
-            tableRef,
-          };
 
-          return new Function('context', 'args', `
-            with(context) {
-              ${pageConfig.eventConfigs[eventName]}
-            }
-          `)(context, arguments);
-        } catch (error: any) {
-          console.error(`事件 ${eventName} 执行出错:`, error);
-          ElMessage.error(`事件执行出错: ${error?.message}`);
-        }
-      };
+    Object.keys(pageConfig.eventConfigs).forEach((eventName) => {
+      globalThis.setEventConsole(eventName)
+      pageConfig.event[eventName] = (args: any, instance: any) => {
+        return eventHandler({
+          eventName,
+          eventConfigs: pageConfig.eventConfigs,
+          args, // 传递事件参数
+          instance,
+        })
+      }
     });
 
 
-    // 处理列事件
+
+    // 这是table内部的事件，注意有scope
     if (pageConfig.columnArr && pageConfig.columnArr.length > 0) {
       pageConfig.columnArr.forEach((column) => {
         const hasEvents = ['defaultSlotConfig', 'headerSlotConfig'];
         Object.keys(column).forEach((key) => {
           if (hasEvents.includes(key)) {
             if (Array.isArray(column[key])) {
-              column[key].forEach((item) => {
+              column[key].forEach((item, index) => {
                 if (typeof item === 'object' && item.event) {
-                  item.event = {};
+                  if (!item.event) item.event = {};
                   Object.keys(item.eventConfigs).forEach((eventName) => {
-                    item.event[eventName] = (...args: any) => {
-                      const e: IEventParams = {
-                        args,
-                        state: {
-                          tableConfig: pageConfig,
-                        },
-                        ctx
-                      };
-                      return new Function('e', item.eventConfigs[eventName])(e);
+                    globalThis.setEventConsole(eventName)
+                    item.event[eventName] = (args: any, scope: any, instance: any) => {
+                      return eventHandler({
+                        args, // 传递事件参数
+                        eventName,
+                        eventConfigs: item.eventConfigs,
+                        instance,
+                        scope
+                      })
                     }
                   })
                 }
@@ -127,15 +114,15 @@ function createProjectCache() {
             } else if (typeof column[key] === 'object' && column[key].event) {
               column[key].event = {};
               Object.keys(column[key].eventConfigs).forEach((eventName) => {
-                column[key].event[eventName] = (...args: any) => {
-                  const e: IEventParams = {
-                    args,
-                    state: {
-                      tableConfig: pageConfig,
-                    },
-                    ctx
-                  };
-                  return new Function('e', column[key].eventConfigs[eventName])(e);
+                globalThis.setEventConsole(eventName)
+                column[key].event[eventName] = (args: any, scope: any, instance: any) => {
+                  return eventHandler({
+                    eventName,
+                    eventConfigs: column[key].eventConfigs,
+                    args, // 传递事件参数
+                    instance,
+                    scope
+                  })
                 }
               })
             }

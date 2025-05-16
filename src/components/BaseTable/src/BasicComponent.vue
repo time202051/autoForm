@@ -11,9 +11,9 @@
     :is="typeof elementOption.comp === 'string' ? comps[elementOption.comp] : elementOption.comp"
     v-model="value"
     v-bind="elementOption?.attr"
-    v-on="elementOption?.event || {}"
     :ref="elementOption?.ref"
   >
+    <!-- v-on="bindEvents" 父组件中处理，因为要scope -->
     <BasicComponent
       v-if="elementOption.children && elementOption.children.length !== 0"
       v-for="(element, i) of elementOption.children"
@@ -115,6 +115,29 @@ const comps: any = {
   ElDescriptions,
   ElDescriptionsItem,
 };
+// watch(
+//   () => props.elementOption,
+//   () => {
+//     console.log("监听到event变化", props.elementOption?.event);
+//   }
+// );
+// const baseTableInstance = inject("baseTable");
+// const bindEvents = computed(() => {
+//   // debugger;
+//   if (!props.elementOption?.event) return {};
+//   const events: any = {};
+//   Object.entries(props.elementOption.event).forEach(([key, fn]) => {
+//     events[key] = (...args: any) => {
+//       try {
+//         return fn(args, baseTableInstance);
+//       } catch (error: any) {
+//         console.error(`事件 ${key} 执行出错:`, error);
+//         ElMessage.error(`事件执行出错: ${error?.message}`);
+//       }
+//     };
+//   });
+//   return events;
+// });
 </script>
 
 <style scoped lang="less"></style>

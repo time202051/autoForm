@@ -3,7 +3,7 @@
     <!-- 左侧内容 -->
     <div class="left-content">
       <!-- <BaseTable v-model="tableOption"></BaseTable> -->
-      <BaseTable :tableOption ref="tableRef"></BaseTable>
+      <BaseTable :tableOption></BaseTable>
     </div>
     <!-- 右侧面板 -->
     <div class="right-panel" v-show="isPanelOpen">
@@ -42,10 +42,10 @@ import { useProjectCache } from "@/hooks";
 const { getPageData } = useProjectCache();
 
 const ns = useNamespace("projectConfig");
-const tableRef = ref<any>();
-onMounted(() => {
-  console.log("tableRef", tableRef.value);
-});
+// const tableRef = ref<any>();
+// onMounted(() => {
+//   console.log("tableRef", tableRef.value);
+// });
 
 const isPanelOpen = ref(true); // 控制面板展开状态
 
@@ -131,14 +131,7 @@ const tableOption = reactive<TableType | any>({
           content: {
             text: "编辑",
           },
-          event: {
-            click: (e: any) => {
-              console.log(444, e);
-              e.row.name = "张三";
-              console.log("点击了", e);
-              dialogVisible.value = true;
-            },
-          },
+          event: {},
           eventConfigs: {},
         },
         {
@@ -149,13 +142,7 @@ const tableOption = reactive<TableType | any>({
           content: {
             text: "删除",
           },
-          event: {
-            click: (e: any) => {
-              console.log("点击了", e);
-              tableOption.data.splice(e.$index, 1);
-              console.log("tableOption", tableOption);
-            },
-          },
+          event: {},
           eventConfigs: {},
         },
       ],
@@ -232,16 +219,6 @@ init();
 const saveFormHandler = (e: PageSchema) => {
   dialogVisible.value = false;
 };
-
-// const onSave = (data: any) => {
-//   console.log(33, data);
-//   const { tableConfig } = data;
-//   Object.keys(tableConfig).forEach((key) => {
-//     tableOption[key] = tableConfig[key];
-//   });
-//   // tableOption.attr = tableConfig.attr;
-//   // tableOption.columnArr = tableConfig.columnArr;
-// };
 </script>
 
 <style lang="scss" scoped>

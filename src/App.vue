@@ -20,6 +20,11 @@ import { useAppStore, useSettingsStore, useProjectStore } from "@/store";
 import defaultSettings from "@/settings";
 import { ThemeMode } from "@/enums/settings/theme.enum";
 import { ComponentSize } from "@/enums/settings/layout.enum";
+import { setRouterAndRouteForEvent } from "@/utils/eventHandler";
+import { useRouter, useRoute } from "vue-router";
+const router = useRouter();
+const route = useRoute();
+setRouterAndRouteForEvent(router, route); //路遥需要在setup中设置
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
@@ -28,7 +33,6 @@ const projectStore = useProjectStore(); //确保被初始化
 const locale = computed(() => appStore.locale);
 const size = computed(() => appStore.size as ComponentSize);
 const watermarkEnabled = computed(() => settingsStore.watermarkEnabled);
-
 // 明亮/暗黑主题水印字体颜色适配
 const fontColor = computed(() => {
   return settingsStore.theme === ThemeMode.DARK ? "rgba(255, 255, 255, .15)" : "rgba(0, 0, 0, .15)";

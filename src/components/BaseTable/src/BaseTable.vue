@@ -15,6 +15,7 @@
 
     <!-- 表格 -->
     <LCTable
+      ref="LCTableRef"
       :tableOption="tableOption"
       v-bind="$attrs"
       @selection-change="handleSelectionChange"
@@ -23,6 +24,7 @@
     <!-- 分页 -->
     <div class="table-pagination">
       <el-pagination
+        ref="paginationRef"
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
         :page-sizes="[10, 20, 50, 100]"
@@ -36,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 import LCTable from "./table.vue";
 import type { TableType } from "@/components/BaseTable/index";
 import { useNamespace } from "@/hooks/useNamespace";
@@ -99,8 +101,15 @@ const fetchData = () => {
   });
   // 在这里调用 API 获取数据，并更新表格和 total
 };
+
+const instance = getCurrentInstance();
+const paginationRef = useTemplateRef("paginationRef");
+const LCTableRef = useTemplateRef("LCTableRef");
+provide("baseTable", instance);
 defineExpose({
-  tableOption: props.tableOption,
+  paginationRef,
+  instance,
+  LCTableRef,
 });
 </script>
 

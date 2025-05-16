@@ -12,6 +12,7 @@ import "epic-designer/dist/style.css";
 import "element-plus/dist/index.css";
 import { setupElementPlus } from "epic-designer/dist/ui/elementPlus";
 import { InstallCodeMirror } from "codemirror-editor-vue3";
+import { setEventConsole } from '@/utils/console'
 // 全局引入 animate.css
 import "animate.css";
 
@@ -23,3 +24,7 @@ const app = createApp(App);
 app.use(setupPlugins);
 app.use(InstallCodeMirror);
 app.mount("#app");
+
+globalThis.setEventConsole = setEventConsole
+
+

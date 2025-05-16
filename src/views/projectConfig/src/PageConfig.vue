@@ -231,6 +231,7 @@ import type {
   TableAttrConfig,
 } from "@/views/projectConfig/src/pageConfig.ts"; // 引入类型定义
 import { tableColumnAttrs, tableAttrs } from "@/views/projectConfig/src/pageConfig"; // 引入类型定义
+import { eventHandler } from "@/utils/eventHandler";
 const props = withDefaults(
   defineProps<{
     modelValue: any;
@@ -367,29 +368,34 @@ const ctx = getCurrentInstance() as ComponentInternalInstance;
 const updateButtonEvent = (column: any, btnIndex: number) => {
   const btn = column.defaultSlotConfig[btnIndex];
   try {
+    if (!btn.event) btn.event = {};
     // 创建事件处理函数
-    btn.event = {
-      click: (...args: any) => {
-        // 创建一个统一的参数对象，包含所有可能用到的参数和方法
-        const e: IEventParams = {
-          args,
-          // 基础数据
-          // scope, // 原始 scope 对象
-          // row: scope.row, // 当前行数据
-          // index: scope.$index, // 当前行索引
-          // column: scope.column, // 当前列信息
-          // 页面状态
-          state: {
-            tableConfig: tableConfig,
-            // eventConfigs, // 事件配置
-          },
-        };
+    btn.event["click"] = (args: any, instance: any) => {
+      return eventHandler({
+        args,
+        eventName: "click",
+        eventConfigs: btn.eventConfigs,
+        instance,
+      });
+      // 创建一个统一的参数对象，包含所有可能用到的参数和方法
+      // const e: IEventParams = {
+      //   args,
+      //   // 基础数据
+      //   // scope, // 原始 scope 对象
+      //   // row: scope.row, // 当前行数据
+      //   // index: scope.$index, // 当前行索引
+      //   // column: scope.column, // 当前列信息
+      //   // 页面状态
+      //   state: {
+      //     tableConfig: tableConfig,
+      //     // eventConfigs, // 事件配置
+      //   },
+      // };
 
-        // 使用 Function 构造函数创建新的函数，只传入一个参数
-        const fn = new Function("e", btn.eventConfigs["click"]); //默认一定是click，后面再扩展其他的
-        // 执行函数，传入统一的参数对象
-        return fn(e);
-      },
+      // // 使用 Function 构造函数创建新的函数，只传入一个参数
+      // const fn = new Function("context", btn.eventConfigs["click"]); //默认一定是click，后面再扩展其他的
+      // // 执行函数，传入统一的参数对象
+      // return fn(e);
     };
   } catch (error) {
     console.error("事件代码格式错误:", error);
@@ -442,31 +448,39 @@ const updateTableEvent = (eventName: string, codeVal?: string) => {
   }
 
   try {
-    tableConfig.value.event[eventName] = (...args: any[]) => {
-      const e: IEventParams = {
-        args,
-        state: {
-          tableConfig: tableConfig,
-          // eventConfigs, // 事件配置
-        },
-        methods: {
-          addColumn, // 添加列方法
-          removeColumn, // 删除列方法
-          addActionButton, // 添加按钮方法
-          removeActionButton, // 删除按钮方法
-          updateTableEvent, // 更新表格事件方法
-          // onSubmit, // 提交方法
-        },
-        ctx: ctx,
-        // 备注
-      };
-      Object.defineProperty(e, "lc-remark", {
-        value: `args:是el-table事件${eventName}的参数，顺序一致`,
-        writable: false, // 只读
-        enumerable: false, // 不可遍历
-      });
-      return new Function("e", tableConfig.value.eventConfigs[eventName])(e);
+    tableConfig.value.event[eventName] = (args: any, instance: any, tableRef: any) => {
+      try {
+        return eventHandler({ args, eventName, eventConfigs: tableConfig.value.eventConfigs });
+      } catch (error: any) {
+        console.error(`事件 ${eventName} 执行出错:`, error);
+        ElMessage.error(`事件执行出错: ${error?.message}`);
+      }
     };
+    // tableConfig.value.event[eventName] = (...args: any[]) => {
+    //   const e: IEventParams = {
+    //     args,
+    //     state: {
+    //       tableConfig: tableConfig,
+    //       // eventConfigs, // 事件配置
+    //     },
+    //     methods: {
+    //       addColumn, // 添加列方法
+    //       removeColumn, // 删除列方法
+    //       addActionButton, // 添加按钮方法
+    //       removeActionButton, // 删除按钮方法
+    //       updateTableEvent, // 更新表格事件方法
+    //       // onSubmit, // 提交方法
+    //     },
+    //     ctx: ctx,
+    //     // 备注
+    //   };
+    //   // Object.defineProperty(e, "lc-remark", {
+    //   //   value: `args:是el-table事件${eventName}的参数，顺序一致`,
+    //   //   writable: false, // 只读
+    //   //   enumerable: false, // 不可遍历
+    //   // });
+    //   return new Function("e", tableConfig.value.eventConfigs[eventName])(e);
+    // };
   } catch (error) {
     console.error("事件代码格式错误:", error);
   }
