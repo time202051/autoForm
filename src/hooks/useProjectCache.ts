@@ -75,7 +75,7 @@ function createProjectCache() {
 
     Object.keys(pageConfig.eventConfigs).forEach((eventName) => {
       globalThis.setEventConsole(eventName)
-      pageConfig.event[eventName] = (args: any, instance: any) => {
+      pageConfig.event[eventName] = ({ args, instance }: any) => {
         return eventHandler({
           eventName,
           eventConfigs: pageConfig.eventConfigs,
@@ -99,7 +99,7 @@ function createProjectCache() {
                   if (!item.event) item.event = {};
                   Object.keys(item.eventConfigs).forEach((eventName) => {
                     globalThis.setEventConsole(eventName)
-                    item.event[eventName] = (args: any, scope: any, instance: any) => {
+                    item.event[eventName] = ({ args, scope, instance }: any) => {
                       return eventHandler({
                         args, // 传递事件参数
                         eventName,
@@ -115,7 +115,7 @@ function createProjectCache() {
               column[key].event = {};
               Object.keys(column[key].eventConfigs).forEach((eventName) => {
                 globalThis.setEventConsole(eventName)
-                column[key].event[eventName] = (args: any, scope: any, instance: any) => {
+                column[key].event[eventName] = ({ args, scope, instance }: any) => {
                   return eventHandler({
                     eventName,
                     eventConfigs: column[key].eventConfigs,

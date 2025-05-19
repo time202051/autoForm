@@ -6,7 +6,9 @@ import request from '@/utils/request'; // 自定义请求工具
 import { usePermissionStore, useUserStore, useAppStore, useSettingsStore, useTagsViewStore, useDictStore, useProjectStore } from '@/store';
 import type { Router, RouteLocationNormalized } from 'vue-router';
 import { v4 as uuidv4 } from 'uuid'; // 生成唯一标识符
-
+import type {
+  IEventParams,
+} from "@/views/projectConfig/src/pageConfig.ts";
 
 
 const utils: any = {
@@ -74,15 +76,14 @@ export const eventHandler = (options: IEventHandler) => {
     'color: inherit;'
   );
   try {
-    const context = {
+    const context: IEventParams = {
       args, // 将事件参数添加到上下文中
       instance,
       tableConfig: instance?.proxy?.tableOption || {},
     };
-    Object.assign(context, { scope });
+    if (scope) Object.assign(context, { scope });
 
     Object.setPrototypeOf(context, utils);
-    // 这里控制台打印给出注册事件的提示信息，不要用console.log。用点高级的。或者加颜色
     return new Function('context', 'args', `
       with(context) {
         ${eventConfigs[eventName]}

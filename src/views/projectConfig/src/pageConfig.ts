@@ -5,6 +5,7 @@ export interface TableScope {
   row: any; // 当前行数据
   $index: number; // 当前行索引
   column: any; // 当前列信息
+  [attrName: string]: any
 }
 
 export interface TableState {
@@ -12,36 +13,11 @@ export interface TableState {
   // eventConfigs: any; // 事件配置
   [attrName: string]: any;
 }
-
-export interface TableMethods {
-  // addColumn: () => void; // 添加列方法
-  // removeColumn: () => void; // 删除列方法
-  // addActionButton: () => void; // 添加按钮方法
-  // removeActionButton: () => void; // 删除按钮方法
-  // updateTableEvent: (eventName: string) => void; // 更新表格事件方法
-  // onSubmit: () => void; // 提交方法
-  [attrKey: string]: any; // 其他方法
-}
-
-export interface TableParams {
-  scope: TableScope; // 原始 scope 对象
-  row: any; // 当前行数据
-  index: number; // 当前行索引
-  column: any; // 当前列信息
-  state: TableState; // 页面状态
-  methods?: TableMethods; // 页面方法
-}
-
-
-
-
 export interface IEventParams {
   args: any;// 原始参数对象
-  state: {
-    tableConfig: any
-  },
-  methods?: any// 页面方法
-  ctx?: ComponentInternalInstance | any// 当前组件实例
+  tableConfig: any; // 表格配置
+  scope?: TableScope; // 原始 scope 对象
+  instance?: ComponentInternalInstance | any// 当前组件实例
 }
 
 

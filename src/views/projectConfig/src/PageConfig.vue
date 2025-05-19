@@ -43,26 +43,36 @@
 
                   <!-- 函数类型显示编辑按钮 -->
                   <div v-else-if="attr.type === 'function'" class="function-editor">
-                    <el-button type="primary" size="small">
+                    <!-- <CodeMirrorEditor
+                      v-model="tableConfig"
+                      :eventName="attr.prop"
+                      text="编辑函数"
+                    ></CodeMirrorEditor> -->
+                    <el-button
+                      type="primary"
+                      size="small"
+                      @click="codeMirrorOpen(attr.prop, tableConfig)"
+                    >
                       <el-icon><Plus /></el-icon>
                       编辑函数
                     </el-button>
                   </div>
 
                   <!-- 对象类型显示编辑按钮 -->
-                  <div v-else-if="attr.type === 'object'" class="object-editor">
+                  <!-- <div v-else-if="attr.type === 'object'" class="object-editor">
                     <el-button type="primary" size="small">
                       <el-icon><Plus /></el-icon>
                       编辑对象
                     </el-button>
-                  </div>
+                  </div> -->
 
                   <!-- 字符串类型使用普通输入框 -->
                   <el-input
-                    v-else
+                    v-else-if="attr.type === 'string'"
                     v-model="tableConfig.attr[attr.prop]"
                     :placeholder="`请输入${attr.label}`"
                   />
+                  <el-text v-else type="info">暂不支持编辑</el-text>
                 </el-form-item>
               </el-form>
             </el-collapse-item>
@@ -79,7 +89,6 @@
                 </template>
                 <AttrConfigForm :attrs="tableColumnAttrs" v-model="column.attr"></AttrConfigForm>
                 <!-- 操作列配置 -->
-                column.attr.prop:{{ !column.attr.prop }}
                 <template v-if="!column.attr.prop">
                   <el-divider>操作按钮配置</el-divider>
                   <div class="action-buttons">
@@ -107,12 +116,26 @@
                           </el-select>
                         </el-form-item>
                         <el-form-item label="点击事件">
-                          <el-input
+                          <el-button
+                            type="primary"
+                            size="small"
+                            @click="codeMirrorOpen('click', column.defaultSlotConfig[btnIndex])"
+                          >
+                            <el-icon><Plus /></el-icon>
+                            代码配置
+                          </el-button>
+
+                          <!-- <CodeMirrorEditor
+                            v-model="column.defaultSlotConfig[btnIndex]"
+                            eventName="click"
+                            @change="updateButtonEvent(column, btnIndex)"
+                          ></CodeMirrorEditor> -->
+                          <!-- <el-input
                             type="textarea"
                             v-model="btn.eventConfigs['click']"
                             placeholder="输入事件处理代码"
                             @change="updateButtonEvent(column, btnIndex)"
-                          />
+                          /> -->
                         </el-form-item>
                       </el-form>
                       <el-button
@@ -140,7 +163,11 @@
                 <div v-for="(eventItem, i) in item.evnets" :key="i" class="event-item">
                   <div class="event-header">
                     <span>{{ eventItem.label }}</span>
-                    <el-button link @click="showCodeEditor(eventItem)" class="add-button">
+                    <el-button
+                      link
+                      @click="codeMirrorOpen(eventItem.value, tableConfig)"
+                      class="add-button"
+                    >
                       <el-icon><Plus /></el-icon>
                     </el-button>
                   </div>
@@ -152,62 +179,15 @@
       </el-tabs>
       <SaveCurrentPage class="save-btn" :tableConfig></SaveCurrentPage>
     </div>
-    <!-- dialog会影响内部代码编辑器的样式，才通过这种方式手撸弹框，支持拖拽缩放 -->
-    <Teleport to="body">
-      <!-- 添加遮罩层 -->
-      <div v-if="dialogVisible" class="editor-overlay"></div>
-      <div
-        v-if="dialogVisible"
-        ref="editorRef"
-        class="editor-container"
-        :style="{
-          left: position.x + 'px',
-          top: position.y + 'px',
-          width: size.width + 'px',
-          height: size.height + 'px',
-        }"
-      >
-        <div
-          class="editor-header"
-          @mousedown="startDrag"
-          :style="{ cursor: isDragging ? 'grabbing' : 'grab' }"
-        >
-          <div class="left-space"></div>
-          <div class="dialog-title">事件编辑</div>
-          <el-icon class="close-icon" @click="closeEditor">
-            <Close />
-          </el-icon>
-        </div>
-        <div class="editor-body">
-          <Codemirror
-            ref="cmComponentRef"
-            v-model:value="tableConfig.eventConfigs[currentEvent.value]"
-            :options="cmOptions"
-            border
-            height="100%"
-            width="100%"
-          ></Codemirror>
-          <!-- @change="(val: string, cm: Editor) => handleContentChange(currentEvent.value, val, cm)" -->
-        </div>
-        <div class="editor-footer">
-          <el-button @click="closeEditor">取消</el-button>
-          <el-button type="primary" @click="saveEditor(currentEvent.value)">确定</el-button>
-        </div>
-        <!-- 拖拽调整大小的边框 -->
-        <div
-          class="resize-handle resize-handle-e"
-          @mousedown.stop="(e) => startResize('e', e)"
-        ></div>
-        <div
-          class="resize-handle resize-handle-s"
-          @mousedown.stop="(e) => startResize('s', e)"
-        ></div>
-        <div
-          class="resize-handle resize-handle-se"
-          @mousedown.stop="(e) => startResize('se', e)"
-        ></div>
-      </div>
-    </Teleport>
+
+    <!-- 代码编辑器弹框 -->
+    <CodeMirrorEditor
+      v-if="codeMirrorVisible"
+      v-model="codeMirrorVisible"
+      :eventName="eventNameCodeMirror"
+      :codeMirrorCurrentObject="codeMirrorCurrentObject"
+      @save="codeMirrorSave"
+    ></CodeMirrorEditor>
   </div>
 </template>
 
@@ -225,13 +205,9 @@ import { useVModel } from "@vueuse/core";
 import CollapsibleCard from "@/views/projectConfig/com/CollapsibleCard.vue";
 import AttrConfigForm from "@/views/projectConfig/com/AttrConfigForm.vue";
 import SaveCurrentPage from "@/views/projectConfig/com/SaveCurrentPage.vue";
-import type {
-  TableParams,
-  IEventParams,
-  TableAttrConfig,
-} from "@/views/projectConfig/src/pageConfig.ts"; // 引入类型定义
 import { tableColumnAttrs, tableAttrs } from "@/views/projectConfig/src/pageConfig"; // 引入类型定义
 import { eventHandler } from "@/utils/eventHandler";
+import CodeMirrorEditor from "@/views/projectConfig/com/CodeMirrorEditor.vue";
 const props = withDefaults(
   defineProps<{
     modelValue: any;
@@ -332,8 +308,6 @@ const addColumn = () => {
 
 // 删除列
 const removeColumn = (index: number) => {
-  console.log(1111111, tableConfig);
-
   tableConfig.value.columnArr.splice(index, 1);
 };
 
@@ -361,153 +335,27 @@ const removeActionButton = (column: any, btnIndex: number) => {
   column.defaultSlotConfig.splice(btnIndex, 1);
 };
 
-// 获取组件实例
-const ctx = getCurrentInstance() as ComponentInternalInstance;
-
-// 更新按钮事件
-const updateButtonEvent = (column: any, btnIndex: number) => {
-  const btn = column.defaultSlotConfig[btnIndex];
-  try {
-    if (!btn.event) btn.event = {};
-    // 创建事件处理函数
-    btn.event["click"] = (args: any, instance: any) => {
-      return eventHandler({
-        args,
-        eventName: "click",
-        eventConfigs: btn.eventConfigs,
-        instance,
-      });
-      // 创建一个统一的参数对象，包含所有可能用到的参数和方法
-      // const e: IEventParams = {
-      //   args,
-      //   // 基础数据
-      //   // scope, // 原始 scope 对象
-      //   // row: scope.row, // 当前行数据
-      //   // index: scope.$index, // 当前行索引
-      //   // column: scope.column, // 当前列信息
-      //   // 页面状态
-      //   state: {
-      //     tableConfig: tableConfig,
-      //     // eventConfigs, // 事件配置
-      //   },
-      // };
-
-      // // 使用 Function 构造函数创建新的函数，只传入一个参数
-      // const fn = new Function("context", btn.eventConfigs["click"]); //默认一定是click，后面再扩展其他的
-      // // 执行函数，传入统一的参数对象
-      // return fn(e);
-    };
-  } catch (error) {
-    console.error("事件代码格式错误:", error);
-  }
-};
-
-// 代码编辑器
-const editorRef = ref<HTMLElement | null>(null);
-const cmComponentRef = ref<CmComponentRef>(null);
-const cmOptions: EditorConfiguration = {
-  mode: "text/javascript",
-};
-const dialogVisible = ref(false);
-const currentEvent = ref<any>(null);
-// 显示代码编辑器
-const showCodeEditor = (eventItem: any) => {
-  console.log(123, eventItem);
-  currentEvent.value = eventItem;
-  dialogVisible.value = true;
-};
-// 关闭编辑器
-const closeEditor = async () => {
-  await ElMessageBox.confirm("代码未保存，是否继续关闭？", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-  });
-  // 用户确认关闭
-  dialogVisible.value = false;
-};
-const saveEditor = (eventName: string) => {
-  updateTableEvent(eventName);
-  dialogVisible.value = false;
-  ElMessage({
-    message: "编辑成功",
-    type: "success",
-  });
-};
-
-// 更新表格事件eventName事件名，codeVal代码值
-const updateTableEvent = (eventName: string, codeVal?: string) => {
-  const val = codeVal || cmComponentRef?.value.cminstance.getValue();
-  console.log("更新表格事件", eventName, val);
-
-  // 如果 codeVal 没有值，删除 eventConfigs 中的事件
-  if (!val) {
-    delete tableConfig.value.eventConfigs[eventName];
-    delete tableConfig.value.event[eventName];
-    return;
-  }
-
-  try {
-    tableConfig.value.event[eventName] = (args: any, instance: any, tableRef: any) => {
-      try {
-        return eventHandler({ args, eventName, eventConfigs: tableConfig.value.eventConfigs });
-      } catch (error: any) {
-        console.error(`事件 ${eventName} 执行出错:`, error);
-        ElMessage.error(`事件执行出错: ${error?.message}`);
-      }
-    };
-    // tableConfig.value.event[eventName] = (...args: any[]) => {
-    //   const e: IEventParams = {
-    //     args,
-    //     state: {
-    //       tableConfig: tableConfig,
-    //       // eventConfigs, // 事件配置
-    //     },
-    //     methods: {
-    //       addColumn, // 添加列方法
-    //       removeColumn, // 删除列方法
-    //       addActionButton, // 添加按钮方法
-    //       removeActionButton, // 删除按钮方法
-    //       updateTableEvent, // 更新表格事件方法
-    //       // onSubmit, // 提交方法
-    //     },
-    //     ctx: ctx,
-    //     // 备注
-    //   };
-    //   // Object.defineProperty(e, "lc-remark", {
-    //   //   value: `args:是el-table事件${eventName}的参数，顺序一致`,
-    //   //   writable: false, // 只读
-    //   //   enumerable: false, // 不可遍历
-    //   // });
-    //   return new Function("e", tableConfig.value.eventConfigs[eventName])(e);
-    // };
-  } catch (error) {
-    console.error("事件代码格式错误:", error);
-  }
-};
-const { position, size, isDragging, startDrag, startResize, cleanup, recalculatePosition } =
-  useResizable(editorRef, { width: 800, height: 800 }, { minWidth: 400, minHeight: 300 });
-// 监听对话框显示状态
-watch(dialogVisible, (newVal) => {
-  if (newVal) {
-    nextTick(() => {
-      recalculatePosition();
-    });
-  }
-});
-// 组件卸载时清理
-onUnmounted(() => {
-  cleanup();
-});
-
-// const onSubmit = () => {
-//   console.log("保存", tableConfig);
-//   emit("save", { tableConfig: cloneDeep(tableConfig) });
-// };
-
 defineExpose({
   tableConfig,
 });
+
+// 编辑弹框
+const codeMirrorVisible = ref<boolean>(false);
+const eventNameCodeMirror = ref<string>("");
+const codeMirrorCurrentObject = ref<any>({});
+const codeMirrorOpen = (key: string, obj: any) => {
+  codeMirrorVisible.value = true;
+  eventNameCodeMirror.value = key;
+  codeMirrorCurrentObject.value = obj;
+};
+const codeMirrorClose = () => {
+  codeMirrorVisible.value = false;
+  eventNameCodeMirror.value = "";
+  codeMirrorCurrentObject.value = {};
+};
+const codeMirrorSave = (data: any) => {
+  codeMirrorClose();
+};
 </script>
 
 <style scoped lang="scss">

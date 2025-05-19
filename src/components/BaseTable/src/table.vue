@@ -206,7 +206,10 @@ const bindEvents = computed(() => {
   Object.entries(props.tableOption.event).forEach(([key, fn]) => {
     events[key] = (...args: any) => {
       try {
-        return fn(args, baseTableInstance);
+        return fn({
+          args,
+          instance: baseTableInstance,
+        });
       } catch (error: any) {
         console.error(`事件 ${key} 执行出错:`, error);
         ElMessage.error(`事件执行出错: ${error?.message}`);
@@ -224,7 +227,11 @@ const bindEventsHandler = (scope: any, config: any) => {
         // 防止冒泡
         $event.stopPropagation();
         if (!args) args = [$event];
-        return fn(args, scope, baseTableInstance);
+        return fn({
+          args,
+          scope,
+          instance: baseTableInstance,
+        });
       } catch (error: any) {
         console.error(`事件 ${key} 执行出错:`, error);
         ElMessage.error(`事件执行出错: ${error?.message}`);

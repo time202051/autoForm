@@ -1,5 +1,5 @@
 <template>
-  <el-button type="primary" @click="saveCurrentPage">保存</el-button>
+  <el-button type="success" @click="saveCurrentPage">保存</el-button>
 </template>
 <script setup lang="ts">
 import { useProjectCache } from "@/hooks";
