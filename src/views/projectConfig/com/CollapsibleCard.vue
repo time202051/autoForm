@@ -5,8 +5,8 @@
       <Close />
     </el-icon>
     <!-- 头部插槽 -->
-    <div v-if="$slots.header" class="card-header">
-      <slot name="header"></slot>
+    <div class="card-header">
+      <slot v-if="$slots.header" name="header"></slot>
     </div>
     <!-- 内容区域，根据高度控制显示 -->
     <div
@@ -36,9 +36,11 @@ import { useElementSize } from "@vueuse/core"; // 引入 useElementSize
 const props = withDefaults(
   defineProps<{
     height?: number; // 外部传入的高度
+    isShowMore?: boolean;
   }>(),
   {
     height: 150, // 默认高度为 150px
+    isShowMore: true,
   }
 );
 
@@ -115,6 +117,7 @@ const handleClose = () => {
   .card-header {
     padding: 10px;
     border-bottom: 1px solid #ebeef5; // 头部底部边框
+    min-height: 35px;
   }
 
   .card-content {

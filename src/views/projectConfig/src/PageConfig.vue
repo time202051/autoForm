@@ -1,8 +1,6 @@
 <template>
   <div class="page-config">
     <div class="config-panel">
-      <!-- <el-button type="primary" @click="onSubmit">提交</el-button> -->
-      <!-- <el-divider /> -->
       <el-tabs v-model="activeName" class="demo-tabs">
         <el-tab-pane label="属性" name="attrName">
           <el-collapse v-model="activeCollapse">
@@ -91,16 +89,13 @@
                 <!-- 操作列配置 -->
                 <template v-if="!column.attr.prop">
                   <el-divider>操作按钮配置</el-divider>
-                  <div class="action-buttons">
-                    <el-button type="primary" size="small" @click="addActionButton(column)">
-                      添加按钮
-                    </el-button>
-                  </div>
-                  <div v-if="column.defaultSlotConfig" class="button-list">
-                    <el-card
+                  <template v-if="column.defaultSlotConfig">
+                    <CollapsibleCard
                       v-for="(btn, btnIndex) in column.defaultSlotConfig"
                       :key="btnIndex"
-                      class="button-item"
+                      :isShowMore="false"
+                      :height="170"
+                      @close="removeActionButton(column, btnIndex)"
                     >
                       <el-form>
                         <el-form-item label="按钮文本">
@@ -124,28 +119,14 @@
                             <el-icon><Plus /></el-icon>
                             代码配置
                           </el-button>
-
-                          <!-- <CodeMirrorEditor
-                            v-model="column.defaultSlotConfig[btnIndex]"
-                            eventName="click"
-                            @change="updateButtonEvent(column, btnIndex)"
-                          ></CodeMirrorEditor> -->
-                          <!-- <el-input
-                            type="textarea"
-                            v-model="btn.eventConfigs['click']"
-                            placeholder="输入事件处理代码"
-                            @change="updateButtonEvent(column, btnIndex)"
-                          /> -->
                         </el-form-item>
                       </el-form>
-                      <el-button
-                        type="danger"
-                        size="small"
-                        @click="removeActionButton(column, btnIndex)"
-                      >
-                        删除按钮
-                      </el-button>
-                    </el-card>
+                    </CollapsibleCard>
+                  </template>
+                  <div class="action-buttons">
+                    <el-button type="primary" size="small" @click="addActionButton(column)">
+                      添加按钮
+                    </el-button>
                   </div>
                 </template>
               </CollapsibleCard>
@@ -208,6 +189,7 @@ import SaveCurrentPage from "@/views/projectConfig/com/SaveCurrentPage.vue";
 import { tableColumnAttrs, tableAttrs } from "@/views/projectConfig/src/pageConfig"; // 引入类型定义
 import { eventHandler } from "@/utils/eventHandler";
 import CodeMirrorEditor from "@/views/projectConfig/com/CodeMirrorEditor.vue";
+import { hasEvents } from "@/hooks/useProjectCache";
 const props = withDefaults(
   defineProps<{
     modelValue: any;
@@ -222,39 +204,6 @@ const props = withDefaults(
 const emit = defineEmits(["update:modelValue", "save"]);
 
 const tableConfig = useVModel(props, "modelValue", emit);
-// watch(
-//   tableConfig.value,
-//   (newValue) => {
-//     emit("update:modelValue", newValue);
-//   },
-//   { deep: true }
-// );
-// const tableConfig = defineModel({
-//   default: () =>
-//     reactive({
-//       data: [],
-//       attr: {},
-//       columnArr: [],
-//       event: {},
-//       eventConfigs: {},
-//     }),
-// });
-
-// 表格配置
-// const tableConfig = reactive<TableType>({
-//   data: [
-//     { id: 1, name: "张三", age: 25, address: "北京" },
-//     { id: 2, name: "李四", age: 30, address: "上海" },
-//   ],
-//   attr: {
-//     border: true,
-//     stripe: true,
-//     size: "default",
-//   },
-//   columnArr: [],
-//   event: {},
-//   eventConfigs: {},
-// });
 
 // 折叠面板激活项
 const activeCollapse = ref(["basic"]);
@@ -332,7 +281,28 @@ const addActionButton = (column: any) => {
 
 // 删除操作按钮
 const removeActionButton = (column: any, btnIndex: number) => {
-  column.defaultSlotConfig.splice(btnIndex, 1);
+  // 动态判断是否有值
+  // 动态判断是否有值
+  const hasEventConfigs = hasEvents.some((field) => {
+    if (column[field] && Array.isArray(column[field])) {
+      return Object.keys(column[field][btnIndex].eventConfigs).length > 0;
+    }
+    return false;
+  });
+
+  console.log(123, column);
+  // 注册事件需要确认删除
+  if (hasEventConfigs) {
+    ElMessageBox.confirm("当前按钮有事件配置，是否删除？", "按钮删除", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }).then(() => {
+      column.defaultSlotConfig.splice(btnIndex, 1);
+    });
+  } else {
+    column.defaultSlotConfig.splice(btnIndex, 1);
+  }
 };
 
 defineExpose({
@@ -360,13 +330,9 @@ const codeMirrorSave = (data: any) => {
 
 <style scoped lang="scss">
 .page-config {
-  // height: 100%;
   width: 100%;
 
   .config-panel {
-    // padding: 20px;
-    // border-left: 1px solid #dcdfe6;
-    // background-color: #f5f7fa;
     position: relative;
     .save-btn {
       position: absolute;
@@ -376,39 +342,12 @@ const codeMirrorSave = (data: any) => {
     .column-tools {
       margin-bottom: 16px;
     }
-
-    .column-card {
-      margin-bottom: 16px;
-
-      .column-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
-
-    .button-list {
-      margin-top: 16px;
-
-      .button-item {
-        margin-bottom: 16px;
-      }
-    }
   }
 }
 
 :deep(.el-collapse-item__header) {
   background-color: #f8f8f8;
 }
-// :deep(.CodeMirror-gutters) {
-//   width: 29px;
-//   .CodeMirror-linenumbers {
-//     width: 29px;
-//   }
-// }
-// :deep(.CodeMirror-sizer) {
-//   margin-left: 39px !important;
-// }
 
 // 事件样式
 .events-panel {
@@ -515,11 +454,6 @@ const codeMirrorSave = (data: any) => {
   .close-icon:hover {
     color: #303133;
   }
-
-  /* 确保编辑器填充剩余空间 */
-  // :deep(.CodeMirror) {
-  //   height: calc(100% - 50px) !important; /* 减去header高度 */
-  // }
 
   /* 拖拽时添加一些视觉反馈 */
   .editor-header:active {

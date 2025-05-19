@@ -1,7 +1,6 @@
 <template>
   <Teleport to="body">
     <!-- dialog会影响内部代码编辑器的样式，才通过这种方式手撸弹框，支持拖拽缩放 -->
-    <!-- 添加遮罩层 -->
     <div v-if="dialogVisible" class="editor-overlay"></div>
     <div
       v-if="dialogVisible"
@@ -56,6 +55,7 @@ import { useResizable } from "@/hooks";
 import { useTemplateRef } from "vue";
 import type { Editor, EditorConfiguration } from "codemirror";
 import { eventHandler } from "@/utils/eventHandler";
+import { cloneDeep } from "lodash";
 
 const props = withDefaults(
   defineProps<{
@@ -71,14 +71,21 @@ const props = withDefaults(
     text: "事件编辑",
   }
 );
-// eventConfigs
-// const model = defineModel<any>({ required: true });
+const initialCode = ref<string>(
+  cloneDeep(props.codeMirrorCurrentObject?.eventConfigs?.[props.eventName]) || undefined
+);
+
+// 计算属性：判断代码是否被修改
+const isModified = computed(() => {
+  return props.codeMirrorCurrentObject?.eventConfigs?.[props.eventName] !== initialCode.value;
+});
 
 const dialogVisible = defineModel({ required: true });
 const editor = useTemplateRef("editor");
 const cmComponentRef = useTemplateRef<any>("cmComponentRef");
 const cmOptions: EditorConfiguration = {
   mode: "text/javascript",
+  autofocus: !unref(initialCode),
 };
 
 const { position, size, isDragging, startDrag, startResize, cleanup, recalculatePosition } =
@@ -105,11 +112,14 @@ onUnmounted(() => {
 
 // 关闭编辑器
 const closeEditor = async () => {
-  await ElMessageBox.confirm("代码未保存，是否继续关闭？", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-  });
+  if (unref(isModified)) {
+    await ElMessageBox.confirm("代码未保存，是否继续关闭？", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+  }
+  props.codeMirrorCurrentObject.eventConfigs[props.eventName] = unref(initialCode);
   // 用户确认关闭
   dialogVisible.value = false;
 };
@@ -117,6 +127,7 @@ const closeEditor = async () => {
 const emit = defineEmits(["save"]);
 const saveEditor = () => {
   dialogVisible.value = false;
+  if (!unref(isModified)) return;
   const codeVal = cmComponentRef?.value.cminstance.getValue();
   if (!codeVal) {
     delete props.codeMirrorCurrentObject.eventConfigs[props.eventName];

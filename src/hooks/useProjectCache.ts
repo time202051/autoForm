@@ -9,6 +9,7 @@ import type {
   IEventParams,
 } from "@/views/projectConfig/src/pageConfig.ts";
 import { eventHandler } from "@/utils/eventHandler";
+export const hasEvents = readonly(['defaultSlotConfig', 'headerSlotConfig']);
 
 // 基础菜单数据结构
 interface IBaseMenuData {
@@ -90,7 +91,7 @@ function createProjectCache() {
     // 这是table内部的事件，注意有scope
     if (pageConfig.columnArr && pageConfig.columnArr.length > 0) {
       pageConfig.columnArr.forEach((column) => {
-        const hasEvents = ['defaultSlotConfig', 'headerSlotConfig'];
+        // const hasEvents = ['defaultSlotConfig', 'headerSlotConfig'];
         Object.keys(column).forEach((key) => {
           if (hasEvents.includes(key)) {
             if (Array.isArray(column[key])) {
