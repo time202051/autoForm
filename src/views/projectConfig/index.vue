@@ -3,7 +3,7 @@
     <!-- 左侧内容 -->
     <div class="left-content">
       <!-- <BaseTable v-model="tableOption"></BaseTable> -->
-      <BaseTable :tableOption></BaseTable>
+      <BaseTable v-model:tableConfig="tableOption" v-model:buttons="buttons"></BaseTable>
     </div>
     <!-- 右侧面板 -->
     <div class="right-panel" v-show="isPanelOpen">
@@ -131,7 +131,11 @@ const tableOption = reactive<TableType | any>({
           content: {
             text: "编辑",
           },
-          event: {},
+          event: {
+            click: () => {
+              dialogVisible.value = true;
+            },
+          },
           eventConfigs: {},
         },
         {
@@ -204,6 +208,15 @@ const tableOption = reactive<TableType | any>({
   event: {},
   eventConfigs: {},
 });
+const buttons = ref([
+  {
+    label: "新建",
+    type: "primary",
+    attr: {},
+    event: {},
+    eventConfigs: {},
+  },
+]);
 
 const init = async () => {
   const data = await getPageData();

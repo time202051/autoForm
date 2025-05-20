@@ -79,7 +79,7 @@ export const eventHandler = (options: IEventHandler) => {
     const context: IEventParams = {
       args, // 将事件参数添加到上下文中
       instance,
-      tableConfig: instance?.proxy?.tableOption || {},
+      tableConfig: instance?.proxy?.tableConfig || {},
     };
     if (scope) Object.assign(context, { scope });
 

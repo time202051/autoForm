@@ -1,6 +1,6 @@
 import type { TableType } from '@/components/BaseTable'
 import type { ComponentInternalInstance } from "vue";
-
+import type { TableColumnType, ISearchConfig } from '@/components/BaseTable/src/table'
 export interface TableScope {
   row: any; // 当前行数据
   $index: number; // 当前行索引
@@ -569,3 +569,24 @@ export const defaultColumnAttr = {
   // filteredValue: undefined, // 已选过滤项，默认为 undefined
   // tooltipFormatter: undefined, // 提示格式化函数，默认为 undefined
 };
+
+
+
+
+// 表格配置
+export interface IPageConfig {
+  data?: Array<Recordable>;
+  attr?: Recordable | any;
+  columnArr: Array<TableColumnType>;
+  event?: Recordable;
+  eventConfigs?: any;//存储事件
+  searchConfigs?: ISearchConfig[];
+  // formConfigs: IFormConfig[]; //用于表单
+  // actionBarConfigs: IActionBarConfig[];//用于操作栏,新增，批量删除，导入导出等按钮
+  [attrName: string]: any;
+}
+
+// 初始化数据
+export const pageConfig: IPageConfig = {
+  columnArr: []
+}

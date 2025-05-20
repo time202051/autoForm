@@ -15,7 +15,9 @@ export const useProjectStore = defineStore('project', () => {
 
   // 当前选中的项目数据
   const selectedProject = useStorage<any>('project-store-selected-project', {});
+  type ModuleType = 'search' | 'actionBar' | 'table' | 'pagination' | ''
 
+  const selectedModule = ref<ModuleType>('')
   /**
    * 添加项目
    * @param project - 项目对象
@@ -71,13 +73,19 @@ export const useProjectStore = defineStore('project', () => {
     return selectedProject.value;
   };
 
+  const setSelectedModule = (module: string) => {
+    selectedModule.value = module
+  }
+
   return {
     projects,
     selectedProject,
+    selectedModule,
     addProject,
     deleteProject,
     updateProject,
     selectProject,
     getSelectedProject,
+    setSelectedModule
   };
 });
