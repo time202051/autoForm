@@ -1,27 +1,34 @@
 <template>
   <div class="search-form__container">
-    <el-form :model="formModel" :label-width="labelWidth" class="search-form" @submit.prevent>
+    <el-form
+      :model="searchConfig.data"
+      :label-width="searchConfig.attr?.labelWidth || '100px'"
+      class="search-form"
+      @submit.prevent
+      v-bind="{ ...searchConfig.attr }"
+    >
       <!-- 表单项区域 -->
-      <el-row :gutter="16" align="middle">
-        <template v-for="(item, idx) in visibleConfig" :key="item.prop">
+      <el-row :gutter="searchConfig.attr?.gutter || 16" align="middle">
+        <template v-for="(item, idx) in visibleConfig" :key="item.attr?.prop">
           <el-col :span="spanValue" class="search-form__col">
-            <el-form-item :label="item.label" :prop="item.id">
+            <!-- :label="item.label" :prop="item.prop" -->
+            <el-form-item v-bind="item.attr">
               <!-- 输入框 -->
               <el-input
-                v-if="item.type === 'input'"
-                v-model="formModel[item.prop]"
-                :placeholder="item.placeholder || '请输入'"
+                v-if="item.attr?.lcType == SearchTypeEnum.INPUT"
+                v-model="searchConfig.data[item.attr?.prop]"
                 clearable
+                v-bind="{ placeholder: item.attr?.placeholder || '请输入', ...item.attr }"
               />
               <!-- 本地下拉 -->
               <el-select
-                v-else-if="item.type === 'local-select'"
-                v-model="formModel[item.prop]"
-                :placeholder="item.placeholder || '请选择'"
+                v-else-if="item.attr?.lcType == SearchTypeEnum.LOCALSELECT"
+                v-model="searchConfig.data[item.attr?.prop]"
                 clearable
+                v-bind="{ placeholder: item.attr?.placeholder || '请选择', ...item.attr }"
               >
                 <el-option
-                  v-for="opt in item.options"
+                  v-for="opt in item.attr?.options"
                   :key="opt.value"
                   :label="opt.label"
                   :value="opt.value"
@@ -29,33 +36,37 @@
               </el-select>
               <!-- 远程下拉 -->
               <el-select
-                v-else-if="item.type === 'remote-select'"
-                v-model="formModel[item.prop]"
+                v-else-if="item.attr?.lcType == SearchTypeEnum.REMOTESELECT"
+                v-model="searchConfig.data[item.attr?.prop]"
                 filterable
                 remote
-                :remote-method="(q: any) => handleRemoteSearch(item, q)"
-                :loading="!remoteOptionsMap[item.prop]"
-                :placeholder="item.placeholder || '请选择'"
+                :remote-method="(q: any) => handleRemoteSearch(item.attr, q)"
+                :loading="!remoteOptionsMap[item.attr?.prop]"
                 clearable
+                v-bind="{ placeholder: item.attr?.placeholder || '请选择', ...item.attr }"
               >
                 <el-option
-                  v-for="opt in remoteOptionsMap[item.prop] || []"
+                  v-for="opt in remoteOptionsMap[item.attr?.prop] || []"
                   :key="opt.value"
                   :label="opt.label"
                   :value="opt.value"
                 />
               </el-select>
               <!-- 日期选择器 -->
+
               <el-date-picker
-                v-else-if="item.type === 'date'"
-                v-model="formModel[item.prop]"
+                v-else-if="item.attr?.lcType == SearchTypeEnum.DATE"
+                v-model="searchConfig.data[item.attr?.prop]"
                 type="datetimerange"
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
-                :placeholder="item.placeholder || '请选择日期时间范围'"
                 clearable
                 style="width: 100%"
+                v-bind="{
+                  placeholder: item.attr?.placeholder || '请选择日期时间范围',
+                  ...item.attr,
+                }"
               />
             </el-form-item>
           </el-col>
@@ -78,86 +89,49 @@ import { ref, computed, reactive, watch } from "vue";
 import { ElMessage } from "element-plus";
 import type { ISearchConfig, RemoteSelectConfig } from "./table";
 import type { TableType } from "@/components/BaseTable/index";
+import { SearchTypeEnum } from "@/views/projectConfig/src/index";
 
 const props = withDefaults(
   defineProps<{
-    tableOption: TableType;
     collapsed?: boolean;
-    labelWidth?: string;
-    rowCount?: number;
+    // labelWidth?: string;
   }>(),
   {
-    tableOption: () => {
-      return {};
-    },
     collapsed: true, // 默认折叠
-    labelWidth: "100px", // 默认 label 宽度
-    rowCount: 4, // 默认每行显示 4 个表单项
+    // labelWidth: "100px", // 默认 label 宽度
   }
 );
 
-const searchConfig = ref<ISearchConfig[]>([
-  {
-    prop: "name",
-    label: "姓名",
-    type: "input",
-    placeholder: "请输入姓名",
-  },
-  {
-    prop: "gender",
-    label: "性别",
-    type: "local-select",
-    options: [
-      { label: "男", value: "male" },
-      { label: "女", value: "female" },
-    ],
-  },
-  {
-    prop: "department",
-    label: "部门",
-    type: "remote-select",
-    apiUrl: "/api/departments",
-    labelField: "name",
-    valueField: "id",
-  },
-  {
-    prop: "dateRange",
-    label: "日期范围",
-    type: "date",
-    placeholder: "请选择日期范围",
-  },
-  {
-    prop: "name",
-    label: "姓名",
-    type: "input",
-    placeholder: "请输入姓名",
-  },
-  {
-    prop: "name1",
-    label: "姓名",
-    type: "input",
-    placeholder: "请输入姓名",
-  },
-]);
+const searchConfig = defineModel<Record<string, any>>({ required: true });
+
+const columnArr = computed(() => unref(searchConfig)?.columnArr || []);
+console.log("运行态数据", searchConfig, columnArr);
 
 const emit = defineEmits(["search", "reset"]);
 
 const collapsed = ref(props.collapsed);
-const rowCount = props.rowCount;
-const labelWidth = props.labelWidth;
+const rowCount = computed(() => unref(searchConfig).attr?.rowCount || 4);
+// const labelWidth = props.labelWidth;
+
+//搜索框宽度自适应宽度
+const searchWidth = computed(() => {
+  if (unref(searchConfig).attr?.autoSearchWidth) return "100%";
+  return unref(searchConfig).attr?.searchWidth
+    ? `${unref(searchConfig).attr?.searchWidth}px`
+    : "200px";
+});
 
 // 动态计算 span 值
-const spanValue = computed(() => 24 / rowCount);
-
-const formModel = defineModel<Record<string, any>>({ required: true });
+const spanValue = computed(() => 24 / unref(rowCount));
 
 // 远程下拉数据缓存
 const remoteOptionsMap = reactive<Record<string, any[]>>({});
 
 // 只显示部分项
-const visibleConfig = computed(() =>
-  collapsed.value ? unref(searchConfig).slice(0, rowCount) : unref(searchConfig)
-);
+const visibleConfig = computed(() => {
+  console.log("搜索框配置", unref(columnArr));
+  return collapsed.value ? unref(columnArr).slice(0, unref(rowCount)) : unref(columnArr);
+});
 
 // 远程下拉请求
 async function fetchRemoteOptions(item: RemoteSelectConfig, query = "") {
@@ -188,17 +162,19 @@ function handleRemoteSearch(item: RemoteSelectConfig, query: string) {
 }
 
 // 初始化远程下拉
-unref(searchConfig).forEach((item: any) => {
-  if (item.type === "remote-select") {
+unref(columnArr).forEach((item: any) => {
+  if (item.attr?.lcType === SearchTypeEnum.REMOTESELECT) {
     fetchRemoteOptions(item as RemoteSelectConfig);
   }
 });
 
 function onSearch() {
-  emit("search", unref(formModel));
+  emit("search", unref(searchConfig));
 }
 function onReset() {
-  Object.keys(unref(formModel)).forEach((key: string) => (unref(formModel)[key] = undefined));
+  Object.keys(unref(searchConfig).data).forEach(
+    (key: string) => (unref(searchConfig).data[key] = undefined)
+  );
   emit("reset");
 }
 function toggleCollapse() {
@@ -236,10 +212,18 @@ function toggleCollapse() {
     }
   }
 }
-// :deep(.el-input) {
-//   width: 300px !important;
-// }
-// :deep(.el-date-editor) {
-//   width: 300px !important;
+
+// 实现搜索框自定义宽度
+:deep(.el-input) {
+  width: v-bind(searchWidth) !important;
+}
+:deep(.el-date-editor) {
+  width: v-bind(searchWidth) !important;
+}
+:deep(.el-select) {
+  width: v-bind(searchWidth) !important;
+}
+// :deep(.el-form-item__content) {
+//   // flex: none;
 // }
 </style>

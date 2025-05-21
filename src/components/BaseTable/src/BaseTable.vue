@@ -2,38 +2,42 @@
   <div :class="ns.b()">
     <!-- 搜索框 -->
     <div
-      :class="{ 'selected-module': projectStore.selectedModule === 'search' }"
-      class="module-container"
-      @click="projectStore.setSelectedModule('search')"
+      :class="[
+        'module-container',
+        ns.is('selected', projectStore.selectedModule === ModuleTypeEnum.SEARCH),
+      ]"
+      @click="projectStore.setSelectedModule(ModuleTypeEnum.SEARCH)"
     >
-      <SearchForm v-model="formModel" :tableOption @search="handleSearch" @reset="handleReset" />
+      <!-- v-model="formModel" -->
+      <SearchForm v-model="tableConfig.searchConfig" @search="handleSearch" @reset="handleReset" />
     </div>
     <!-- 顶部操作按钮 actionBar-->
     <div
-      :class="{ 'selected-module': projectStore.selectedModule === 'actionBar' }"
-      class="module-container table-header"
-      @click="projectStore.setSelectedModule('actionBar')"
+      :class="[
+        'module-container',
+        'table-header',
+        ns.is('selected', projectStore.selectedModule === ModuleTypeEnum.ACTIONBAR),
+      ]"
+      @click="projectStore.setSelectedModule(ModuleTypeEnum.ACTIONBAR)"
     >
       <!-- 动态渲染按钮 -->
-      <el-button
-        v-for="(button, index) in buttons"
-        :key="index"
-        :type="button.type"
-        @click="handleButtonClick(button)"
-      >
+      <el-button v-for="(button, index) in buttons" :key="index" :type="button.type">
         {{ button.label }}
       </el-button>
     </div>
 
     <!-- 表格 -->
     <div
-      :class="{ 'selected-module': projectStore.selectedModule === 'table' }"
-      class="module-container table-container"
-      @click="projectStore.setSelectedModule('table')"
+      :class="[
+        'module-container',
+        'table-container',
+        ns.is('selected', projectStore.selectedModule === ModuleTypeEnum.TABLE),
+      ]"
+      @click="projectStore.setSelectedModule(ModuleTypeEnum.TABLE)"
     >
       <LCTable
         ref="LCTableRef"
-        :tableOption="tableOption"
+        :tableOption="tableConfig"
         v-bind="$attrs"
         @selection-change="handleSelectionChange"
       ></LCTable>
@@ -41,9 +45,12 @@
 
     <!-- 分页 -->
     <div
-      :class="{ 'selected-module': projectStore.selectedModule === 'pagination' }"
-      class="module-container table-pagination"
-      @click="projectStore.setSelectedModule('pagination')"
+      :class="[
+        'module-container',
+        'table-pagination',
+        ns.is('selected', projectStore.selectedModule === ModuleTypeEnum.PAGINATION),
+      ]"
+      @click="projectStore.setSelectedModule(ModuleTypeEnum.PAGINATION)"
     >
       <el-pagination
         ref="paginationRef"
@@ -67,6 +74,8 @@ import { useNamespace } from "@/hooks/useNamespace";
 import SearchForm from "./SearchForm.vue";
 import { ISearchConfig } from "@/components/BaseTable/src/table";
 import { useProjectStore } from "@/store";
+import { ModuleTypeEnum } from "@/views/projectConfig/src/pageConfig";
+
 // 定义按钮配置类型
 interface ButtonConfig {
   label: string; // 按钮文本
@@ -74,14 +83,9 @@ interface ButtonConfig {
   [key: string]: any; // 其他属性
 }
 
-// 定义 props
-const props = defineProps<{
-  // tableOption: TableType;
-  // buttons?: ButtonConfig[]; // 按钮配置
-}>();
-
 //为了instance中名称一致，都叫tableConfig
-const tableOption = defineModel<TableType>("tableConfig", { required: true });
+const tableConfig = defineModel<any>("tableConfig", { required: true });
+
 const buttons = defineModel<ButtonConfig[]>("buttons", { required: true });
 const ns = useNamespace("baseTable");
 
@@ -92,15 +96,6 @@ const total = ref(100); // 总条数（根据实际数据动态更新）
 
 // 选中行数据
 const selectedRows = ref<any[]>([]);
-
-// 处理按钮点击
-const handleButtonClick = (button: ButtonConfig) => {
-  // if (button.action) {
-  //   button.action(selectedRows.value); // 执行自定义逻辑
-  // } else {
-  //   console.log(`点击了按钮：${button.text}`);
-  // }
-};
 
 // 处理表格选中行变化
 const handleSelectionChange = (rows: any[]) => {
@@ -140,10 +135,10 @@ defineExpose({
 
 // 表单数据
 const formModel = ref({
-  name: "",
-  gender: "",
-  department: "",
-  dateRange: [],
+  // name: "",
+  // gender: "",
+  // department: "",
+  // dateRange: [],
 });
 
 // 查询事件
@@ -169,16 +164,14 @@ const projectStore = useProjectStore();
   flex-direction: column;
 
   .table-header {
-    // margin-bottom: 16px;
     display: flex;
-    gap: 8px;
   }
   .table-container {
     flex: 1;
   }
 
   .table-pagination {
-    margin-top: 16px;
+    // margin-top: 16px;
     text-align: right;
   }
 }
@@ -193,7 +186,7 @@ const projectStore = useProjectStore();
   cursor: pointer;
 }
 
-.module-container.selected-module {
+.is-selected {
   border-color: #409eff;
   background-color: rgba(64, 158, 255, 0.1);
 }

@@ -1,3 +1,4 @@
+import { IAttrConfig } from '@/views/projectConfig/src/index'
 import type { TableType } from '@/components/BaseTable'
 import type { ComponentInternalInstance } from "vue";
 import type { TableColumnType, ISearchConfig } from '@/components/BaseTable/src/table'
@@ -20,18 +21,7 @@ export interface IEventParams {
   instance?: ComponentInternalInstance | any// 当前组件实例
 }
 
-
-// 定义属性配置类型
-export interface TableAttrConfig {
-  label: string;  // 显示的标签名
-  prop: string;   // 属性名
-  type: 'string' | 'number' | 'boolean' | 'enum' | 'function' | 'object' | any;  // 属性类型
-  default?: any;  // 默认值
-  options?: { label: string; value: any }[];  // 枚举选项
-  description?: string;  // 属性描述
-}
-
-export const tableAttrs: TableAttrConfig[] = [
+export const tableAttrs: IAttrConfig[] = [
   {
     label: '表格高度',
     prop: 'height',
@@ -334,7 +324,7 @@ export const defaultTableAttr = {
 }
 
 
-export const tableColumnAttrs: TableAttrConfig[] = [
+export const tableColumnAttrs: IAttrConfig[] = [
   {
     prop: 'type',
     label: '列类型',
@@ -572,7 +562,14 @@ export const defaultColumnAttr = {
 
 
 
-
+export type ModuleType = 'search' | 'actionBar' | 'table' | 'pagination' | ''
+export enum ModuleTypeEnum {
+  SEARCH = 'search',
+  ACTIONBAR = 'actionBar',
+  TABLE = 'table',
+  PAGINATION = 'pagination',
+  EMPTY = ''
+}
 // 表格配置
 export interface IPageConfig {
   data?: Array<Recordable>;
@@ -580,13 +577,8 @@ export interface IPageConfig {
   columnArr: Array<TableColumnType>;
   event?: Recordable;
   eventConfigs?: any;//存储事件
-  searchConfigs?: ISearchConfig[];
+  searchConfig?: ISearchConfig[];
   // formConfigs: IFormConfig[]; //用于表单
   // actionBarConfigs: IActionBarConfig[];//用于操作栏,新增，批量删除，导入导出等按钮
   [attrName: string]: any;
-}
-
-// 初始化数据
-export const pageConfig: IPageConfig = {
-  columnArr: []
 }

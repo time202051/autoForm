@@ -1,4 +1,5 @@
 import type { Ref } from "vue";
+import { SearchTypeEnum } from '@/views/projectConfig/src/index'
 
 interface ISearchConfigBase {
   id?: string; // 唯一标识
@@ -12,13 +13,13 @@ interface ISearchConfigBase {
 }
 
 interface LocalSelectConfig extends ISearchConfigBase {
-  type: "local-select";
+  type: SearchTypeEnum.LOCALSELECT; //local-select
   options: { label: string; value: string;[key: string]: any }[];
   [attrName: string]: any;
 }
 
 export interface RemoteSelectConfig extends ISearchConfigBase {
-  type: "remote-select";
+  type: SearchTypeEnum.REMOTESELECT, //"remote-select";
   apiUrl: string;
   queryParams?: Record<string, any>;
   options?: { label?: string; value?: string;[key: string]: any }[];
@@ -28,13 +29,13 @@ export interface RemoteSelectConfig extends ISearchConfigBase {
 }
 
 interface InputConfig extends ISearchConfigBase {
-  type: "input";
+  type: SearchTypeEnum.INPUT;
   placeholder?: string;
   [attrName: string]: any;
 }
 
 interface DateConfig extends ISearchConfigBase {
-  type: "date";
+  type: SearchTypeEnum.DATE;
   placeholder?: string;
 
   // 时间范围专用startDate，endDate。替代双向绑定的value
@@ -56,7 +57,7 @@ export interface TableType {
   appendSlotConfig?: CompType;
   emptySlotConfig?: CompType;
   eventConfigs?: any;//存储事件
-  searchConfigs?: ISearchConfig[];
+  searchConfigs?: any; //ISearchConfig[]
   [key: string]: any;
 }
 

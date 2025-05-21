@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useStorage } from '@vueuse/core';
 import { useProjectCache } from "@/hooks";
-
+import { ModuleType } from '@/views/projectConfig/src/pageConfig'
 // 定义项目类型
 interface Project {
   id: string;
@@ -15,7 +15,6 @@ export const useProjectStore = defineStore('project', () => {
 
   // 当前选中的项目数据
   const selectedProject = useStorage<any>('project-store-selected-project', {});
-  type ModuleType = 'search' | 'actionBar' | 'table' | 'pagination' | ''
 
   const selectedModule = ref<ModuleType>('')
   /**

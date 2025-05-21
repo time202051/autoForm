@@ -1,7 +1,12 @@
 <template>
   <div class="page-config">
     <div class="config-panel">
-      <el-tabs v-model="activeName" class="demo-tabs">
+      <!-- 搜索框配置 -->
+      <SearchConfigCom
+        v-if="selectedModule == ModuleTypeEnum.SEARCH"
+        v-model="tableConfig.searchConfig"
+      ></SearchConfigCom>
+      <el-tabs v-else v-model="activeName" class="demo-tabs">
         <el-tab-pane label="属性" name="attrName">
           <el-collapse v-model="activeCollapse">
             <!-- 基础属性配置 -->
@@ -190,20 +195,28 @@ import { tableColumnAttrs, tableAttrs } from "@/views/projectConfig/src/pageConf
 import { eventHandler } from "@/utils/eventHandler";
 import CodeMirrorEditor from "@/views/projectConfig/com/CodeMirrorEditor.vue";
 import { hasEvents } from "@/hooks/useProjectCache";
-const props = withDefaults(
-  defineProps<{
-    modelValue: any;
-  }>(),
-  {
-    modelValue: () => {
-      return {};
-    },
-  }
-);
+import type { IPageConfig } from "./pageConfig";
+import SearchConfigCom from "./SearchConfig.vue";
+import { useProjectStore } from "@/store";
+import { ModuleTypeEnum } from "@/views/projectConfig/src/pageConfig";
 
-const emit = defineEmits(["update:modelValue", "save"]);
+// const props = withDefaults(
+//   defineProps<{
+//     modelValue: any;
+//   }>(),
+//   {
+//     modelValue: () => {
+//       return {};
+//     },
+//   }
+// );
+const tableConfig = defineModel<IPageConfig>({ required: true });
+console.log(123, tableConfig);
 
-const tableConfig = useVModel(props, "modelValue", emit);
+const projectStore = useProjectStore();
+const selectedModule = computed(() => projectStore.selectedModule);
+const emit = defineEmits(["save"]);
+// const tableConfig = useVModel(props, "modelValue", emit);
 
 // 折叠面板激活项
 const activeCollapse = ref(["basic"]);

@@ -40,7 +40,7 @@
           :elementOption="defaultSlotConfigHandle(tableColumn.defaultSlotConfig as CompType)"
           v-if="tableColumn.defaultSlotConfig && typeof tableColumn.defaultSlotConfig === 'object'"
           v-model="scope.row[tableColumn.attr?.prop]"
-          v-on="eventHandle(scope, tableColumn.defaultSlotConfig as CompType) || {}"
+          v-on="bindEventsHandler(scope, tableColumn.defaultSlotConfig as CompType) || {}"
         />
         <template
           v-if="tableColumn.defaultSlotConfig && Array.isArray(tableColumn.defaultSlotConfig)"
@@ -90,7 +90,7 @@ import { useNamespace } from "@/hooks/useNamespace";
 import { useVModel } from "@vueuse/core";
 const ns = useNamespace("table");
 const props = defineProps<{
-  tableOption: TableType;
+  tableOption: TableType | any;
 }>();
 
 // const emit = defineEmits(["update:tableOption"]);

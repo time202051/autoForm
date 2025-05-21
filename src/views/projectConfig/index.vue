@@ -39,6 +39,11 @@ import PageConfig from "./src/PageConfig.vue";
 import { defaultTableAttr, defaultColumnAttr } from "@/views/projectConfig/src/pageConfig";
 import { cloneDeep } from "lodash-es";
 import { useProjectCache } from "@/hooks";
+import {
+  defaultSearchAttrs,
+  defaultSearchColumnAttrs,
+} from "@/views/projectConfig/src/searchConfig";
+
 const { getPageData } = useProjectCache();
 
 const ns = useNamespace("projectConfig");
@@ -59,7 +64,7 @@ const showFormConfig = () => {
 };
 
 const loading = ref(false);
-const tableOption = reactive<TableType | any>({
+const tableOption = reactive<TableType>({
   data: [
     {
       date: "2016-05-03",
@@ -207,11 +212,85 @@ const tableOption = reactive<TableType | any>({
   ],
   event: {},
   eventConfigs: {},
+  searchConfig: {
+    data: {}, //双向绑定的值
+    attr: cloneDeep(defaultSearchAttrs),
+    columnArr: [
+      {
+        attr: {
+          ...cloneDeep(defaultSearchColumnAttrs),
+        },
+        event: {},
+        eventConfigs: {},
+      },
+      {
+        attr: {
+          ...cloneDeep(defaultSearchColumnAttrs),
+        },
+        event: {},
+        eventConfigs: {},
+      },
+      // {
+      //   attr: {
+      //     prop: "gender",
+      //     label: "性别",
+      //     type: "local-select",
+      //     options: [
+      //       { label: "男", value: "male" },
+      //       { label: "女", value: "female" },
+      //     ],
+      //   },
+      //   event: {},
+      //   eventConfigs: {},
+      // },
+      // {
+      //   attr: {
+      //     prop: "department",
+      //     label: "部门",
+      //     type: "remote-select",
+      //     apiUrl: "/api/departments",
+      //     labelField: "name",
+      //     valueField: "id",
+      //   },
+      //   event: {},
+      //   eventConfigs: {},
+      // },
+      // {
+      //   attr: {
+      //     prop: "dateRange",
+      //     label: "日期范围",
+      //     type: "date",
+      //     placeholder: "请选择日期范围",
+      //   },
+      //   event: {},
+      //   eventConfigs: {},
+      // },
+      // {
+      //   attr: { prop: "name", label: "姓名", type: "input", placeholder: "请输入姓名" },
+      //   event: {},
+      //   eventConfigs: {},
+      // },
+      // {
+      //   attr: { prop: "name1", label: "姓名", type: "input", placeholder: "请输入姓名" },
+      //   event: {},
+      //   eventConfigs: {},
+      // },
+    ],
+    event: {},
+    eventConfigs: {},
+  },
 });
-const buttons = ref([
+const buttons = ref<any>([
   {
     label: "新建",
     type: "primary",
+    attr: {},
+    event: {},
+    eventConfigs: {},
+  },
+  {
+    label: "批量删除",
+    type: "danger",
     attr: {},
     event: {},
     eventConfigs: {},
