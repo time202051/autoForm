@@ -218,6 +218,8 @@ const tableOption = reactive<TableType>({
     columnArr: [
       {
         attr: {
+          label: "文本",
+          prop: "text",
           ...cloneDeep(defaultSearchColumnAttrs),
         },
         event: {},
@@ -225,6 +227,8 @@ const tableOption = reactive<TableType>({
       },
       {
         attr: {
+          label: "文本1",
+          prop: "text1",
           ...cloneDeep(defaultSearchColumnAttrs),
         },
         event: {},

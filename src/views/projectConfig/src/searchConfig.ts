@@ -92,29 +92,17 @@ export const defaultSearchAttrs = {
 }
 
 export const searchColumnAttrs: IAttrConfig[] = [
-  // {
-  //   prop: "prop",
-  //   label: "字段名",
-  //   type: "string",
-  //   description: "设置表单项的字段名",
-  // },
-  // {
-  //   prop: "label",
-  //   label: "标签",
-  //   type: "string",
-  //   description: "设置表单项的标签",
-  // },
+  {
+    prop: "label",
+    label: "标题",
+    type: "string",
+    description: "设置表单项的字段名",
+  },
   {
     prop: "prop",
     label: "字段",
     type: "string",
     description: "双向绑定,传入查询接口的键名",
-  },
-  {
-    prop: "label",
-    label: "字段名",
-    type: "string",
-    description: "设置表单项的字段名",
   },
   {
     prop: "lcType",
@@ -127,17 +115,38 @@ export const searchColumnAttrs: IAttrConfig[] = [
       { label: "日期选择器", value: SearchTypeEnum.DATE },
     ],
     description: "设置表单项的类型",
-    attr: {},
+    attr: {
+      onChange: (modelValue: Record<string, any>, val: string) => {
+        // console.log(123, modelValue, val);
+        // delete modelValue.options
+        // delete modelValue.lcDict
+      }
+    },
     children: {
       [SearchTypeEnum.LOCALSELECT]: [
+        {
+          prop: "lcDict",
+          label: "字典数据",
+          type: "string",
+          description: "通过字典获取下拉框数据",
+        },
         {
           prop: "options",
           label: "下拉框选项",
           type: "array",
-          description: "本地手动配置的下拉框静态数据",
+          description: "本地手动配置的下拉框静态数据,label:展示文本,value:实际值",
+          show: (modelValue: any) => !modelValue.lcDict,
+        },
+      ],
+      [SearchTypeEnum.REMOTESELECT]: [
+        {
+          prop: "lcUrl",
+          label: "url",
+          type: "string",
+          description: "远程下拉框接口地址",
         },
       ]
-    }
+    },
   },
   // {
   //   prop: "placeholder",

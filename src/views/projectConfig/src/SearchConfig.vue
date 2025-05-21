@@ -14,12 +14,15 @@
               @close="removeColumn(index)"
             >
               <template #header>
-                <span>列 {{ index + 1 }}</span>
+                <span># {{ index + 1 }}</span>
               </template>
               <AttrConfigForm :attrs="searchColumnAttrs" v-model="column.attr"></AttrConfigForm>
             </CollapsibleCard>
             <div class="column-tools">
-              <el-button type="primary" @click="addColumn">添加列</el-button>
+              <el-button type="primary" @click="addColumn">
+                <el-icon><Plus /></el-icon>
+                添加列
+              </el-button>
             </div>
           </el-collapse-item>
         </el-collapse>
@@ -47,9 +50,9 @@ const addColumn = () => {
   searchConfig.value.columnArr.push({
     attr: {
       prop: "",
-      label: "",
+      label: "文本",
       lcType: "input",
-      placeholder: "",
+      // placeholder: "",
     },
   });
 };
