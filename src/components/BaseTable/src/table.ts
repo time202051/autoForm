@@ -1,51 +1,22 @@
 import type { Ref } from "vue";
-import { SearchTypeEnum } from '@/views/projectConfig/src/index'
 
-interface ISearchConfigBase {
-  id?: string; // 唯一标识
-  prop: string; // 对应列的字段名
-  label: string; // label文本
-  value: any; // 搜索框双向绑定的值
-  // 开始时间
-
-  type: string; // input, local-select, remote-select, date
-  [attrName: string]: any;
+// 表格头部搜索框的单个搜索框配置
+interface ISearchItem {
+  attr: Recordable,
+  event?: Recordable, //搜索框组件事件
+  eventConfigs?: Recordable, //存储事件
+  customEvent?: Recordable, //自定义事件, 页面中特定的函数
+  customEventConfigs?: Recordable, //存储自定义事件
 }
 
-interface LocalSelectConfig extends ISearchConfigBase {
-  type: SearchTypeEnum.LOCALSELECT; //local-select
-  options: { label: string; value: string;[key: string]: any }[];
-  [attrName: string]: any;
+// 表格头部搜索框整体配置
+export interface ISearchConfig {
+  attr: Recordable,
+  columnArr: ISearchItem[],
+  data: Recordable, //双向绑定的值
+  event?: Recordable, //搜索框组件事件
+  eventConfigs?: Recordable, //存储事件
 }
-
-export interface RemoteSelectConfig extends ISearchConfigBase {
-  type: SearchTypeEnum.REMOTESELECT, //"remote-select";
-  apiUrl: string;
-  queryParams?: Record<string, any>;
-  options?: { label?: string; value?: string;[key: string]: any }[];
-  labelField?: string;
-  valueField?: string;
-  [attrName: string]: any;
-}
-
-interface InputConfig extends ISearchConfigBase {
-  type: SearchTypeEnum.INPUT;
-  placeholder?: string;
-  [attrName: string]: any;
-}
-
-interface DateConfig extends ISearchConfigBase {
-  type: SearchTypeEnum.DATE;
-  placeholder?: string;
-
-  // 时间范围专用startDate，endDate。替代双向绑定的value
-  startDate?: string;
-  endDate?: string;
-  [attrName: string]: any;
-}
-
-export type ISearchConfig = LocalSelectConfig | RemoteSelectConfig | InputConfig | DateConfig;
-
 
 export interface TableType {
   data?: Array<any>;
@@ -57,7 +28,7 @@ export interface TableType {
   appendSlotConfig?: CompType;
   emptySlotConfig?: CompType;
   eventConfigs?: any;//存储事件
-  searchConfigs?: any; //ISearchConfig[]
+  searchConfig?: ISearchConfig; //ISearchConfig[]
   [key: string]: any;
 }
 

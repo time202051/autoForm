@@ -98,17 +98,38 @@
             添加项
           </el-button>
         </div>
+
+        <div v-else-if="item.type === 'editor'" class="object-editor">
+          <el-button
+            type="primary"
+            size="small"
+            @click="codeMirrorOpen(LcSearchPropNnum.LCREMOTEPARAMS)"
+          >
+            <el-icon><Plus /></el-icon>
+            参数编辑
+          </el-button>
+        </div>
         <!-- 其他类型：不显示 -->
         <span v-else>暂不支持配置</span>
       </el-form-item>
       <!-- 动态渲染 children -->
       <template v-if="item.children">
+        <!-- 不推荐对象 -->
         <AttrConfigForm
           v-if="typeof item.children === 'object' && !Array.isArray(item.children)"
           :attrs="item.children[modelValue[item.prop]] || []"
           v-model="modelValue"
+          v-model:event="event"
+          v-model:eventConfigs="eventConfigs"
         />
-        <AttrConfigForm v-else :attrs="item.children" v-model="modelValue" />
+        <!--  推荐数组 -->
+        <AttrConfigForm
+          v-else
+          :attrs="item.children"
+          v-model="modelValue"
+          v-model:event="event"
+          v-model:eventConfigs="eventConfigs"
+        />
       </template>
     </template>
   </el-form>
@@ -125,6 +146,16 @@
       <el-button type="primary" @click="saveEdit">保存</el-button>
     </template>
   </el-dialog>
+
+  <!-- 代码编辑器弹框 -->
+  <CodeMirrorEditor
+    v-if="codeMirrorVisible"
+    v-model="codeMirrorVisible"
+    v-model:event="event"
+    v-model:eventConfigs="eventConfigs"
+    :eventName="eventNameCodeMirror"
+    @save="codeMirrorClose"
+  ></CodeMirrorEditor>
 </template>
 
 <script setup lang="ts">
@@ -132,12 +163,20 @@ import { Edit, Plus } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import type { IAttrConfig } from "@/views/projectConfig/src/index";
-
+import CodeMirrorEditor from "@/views/projectConfig/com/CodeMirrorEditor.vue";
+import { LcSearchPropNnum } from "@/views/projectConfig/src/index";
 const props = defineProps<{
   attrs: IAttrConfig[]; // 属性配置数据
 }>();
 
 const modelValue = defineModel<Record<string, any>>({ required: true });
+//事件,非必填 (可以是eventConfigs,也可是customEventConfigs)
+const eventConfigs = defineModel<Record<string, any>>("eventConfigs", {
+  required: false,
+  default: {},
+});
+//事件,非必填 (可以是event,也可是customEvent)
+const event = defineModel<Record<string, any>>("event", { required: false, default: {} });
 
 // 编辑弹框的显示状态
 const editDialogVisible = ref(false);
@@ -209,6 +248,19 @@ const getArrayKeys = (prop: string) => {
     return []; // 如果数组为空，返回空数组
   }
   return Object.keys(array[0]); // 返回第一个对象的键名
+};
+
+//代码编辑器弹框
+const codeMirrorVisible = ref(false);
+const eventNameCodeMirror = ref<string>(""); //事件名称
+
+const codeMirrorOpen = (key: string) => {
+  codeMirrorVisible.value = true;
+  eventNameCodeMirror.value = key;
+};
+const codeMirrorClose = () => {
+  codeMirrorVisible.value = false;
+  eventNameCodeMirror.value = "";
 };
 </script>
 

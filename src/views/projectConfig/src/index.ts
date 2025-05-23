@@ -8,6 +8,30 @@ export enum SearchTypeEnum {
 
 export type ISearchType = SearchTypeEnum.INPUT | SearchTypeEnum.LOCALSELECT | SearchTypeEnum.REMOTESELECT | SearchTypeEnum.DATE;
 
+// type属性配置类型
+export type IAttrConfigType = 'string' | 'number' | 'boolean' | 'enum' | 'array' | 'function' | 'object' | 'editor' | any;
+export enum AttrConfigTypeEnum {
+  STRING = 'string', //字符串
+  NUMBER = 'number', //数字
+  BOOLEAN = 'boolean', //布尔
+  ENUM = 'enum', //下拉框选项
+  ARRAY = 'array', //数组
+  FUNCTION = 'function', //函数
+  OBJECT = 'object', //对象
+  EDITOR = 'editor', //编辑器
+  ANY = 'any', //任意
+}
+
+
+//prop内置字段以lc开头,外部禁止修改
+export enum LcSearchPropNnum {
+  lCTYPE = 'lcType', // 组件类型
+  lCDICT = 'lcDict', // 字典配置
+  LCOPTIONS = 'lcOptions', // 静态下拉框选项
+  LCREMOTEURL = 'lcRemoteUrl', // 远程下拉框请求地址
+  LCMETHOD = 'lcMethod', //远程下拉框接口类型
+  LCREMOTEPARAMS = 'lcRemoteParams' //远程下拉框请求参数
+}
 
 // 配置文件的属性配置项
 export interface IAttrConfig {

@@ -4,10 +4,15 @@
       <el-tab-pane label="属性" name="attrName">
         <el-collapse v-model="activeCollapse">
           <el-collapse-item title="基础属性" name="basic">
-            <AttrConfigForm :attrs="searchAttrs" v-model="searchConfig.attr"></AttrConfigForm>
+            <AttrConfigForm
+              :attrs="searchAttrs"
+              v-model="searchConfig.attr"
+              v-model:event="searchConfig.event"
+              v-model:eventConfigs="searchConfig.eventConfigs"
+            ></AttrConfigForm>
           </el-collapse-item>
 
-          <el-collapse-item title="列配置" name="columns">
+          <el-collapse-item title="查询条件配置" name="columns">
             <CollapsibleCard
               v-for="(column, index) in searchConfig.columnArr"
               :key="index"
@@ -16,12 +21,18 @@
               <template #header>
                 <span># {{ index + 1 }}</span>
               </template>
-              <AttrConfigForm :attrs="searchColumnAttrs" v-model="column.attr"></AttrConfigForm>
+              <AttrConfigForm
+                :attrs="searchColumnAttrs"
+                v-model="column.attr"
+                v-model:event="column.customEvent"
+                v-model:eventConfigs="column.customEventConfigs"
+              ></AttrConfigForm>
+              <!-- v-mode:eventConfigs="column.eventConfigs" -->
             </CollapsibleCard>
             <div class="column-tools">
               <el-button type="primary" @click="addColumn">
                 <el-icon><Plus /></el-icon>
-                添加列
+                添加查询条件
               </el-button>
             </div>
           </el-collapse-item>

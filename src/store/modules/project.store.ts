@@ -72,7 +72,7 @@ export const useProjectStore = defineStore('project', () => {
     return selectedProject.value;
   };
 
-  const setSelectedModule = (module: string) => {
+  const setSelectedModule = (module: ModuleType) => {
     selectedModule.value = module
   }
 

@@ -574,10 +574,10 @@ export enum ModuleTypeEnum {
 export interface IPageConfig {
   data?: Array<Recordable>;
   attr?: Recordable | any;
-  columnArr: Array<TableColumnType>;
+  columnArr?: Array<TableColumnType>;
   event?: Recordable;
   eventConfigs?: any;//存储事件
-  searchConfig?: ISearchConfig[];
+  searchConfig?: ISearchConfig;
   // formConfigs: IFormConfig[]; //用于表单
   // actionBarConfigs: IActionBarConfig[];//用于操作栏,新增，批量删除，导入导出等按钮
   [attrName: string]: any;

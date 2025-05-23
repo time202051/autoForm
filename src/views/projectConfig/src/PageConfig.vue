@@ -170,8 +170,9 @@
     <CodeMirrorEditor
       v-if="codeMirrorVisible"
       v-model="codeMirrorVisible"
+      v-model:eventConfigs="codeMirrorCurrentObject.eventConfigs"
+      v-model:event="codeMirrorCurrentObject.event"
       :eventName="eventNameCodeMirror"
-      :codeMirrorCurrentObject="codeMirrorCurrentObject"
       @save="codeMirrorSave"
     ></CodeMirrorEditor>
   </div>
@@ -211,7 +212,7 @@ import { ModuleTypeEnum } from "@/views/projectConfig/src/pageConfig";
 //   }
 // );
 const tableConfig = defineModel<IPageConfig>({ required: true });
-console.log(123, tableConfig);
+console.log("所有数据", tableConfig);
 
 const projectStore = useProjectStore();
 const selectedModule = computed(() => projectStore.selectedModule);
@@ -258,7 +259,8 @@ const elTableEvents = [
 
 // 添加列
 const addColumn = () => {
-  tableConfig.value.columnArr.push({
+  if (!tableConfig.value?.columnArr) tableConfig.value.columnArr = [];
+  tableConfig.value?.columnArr.push({
     attr: {
       prop: "",
       label: "",
@@ -270,7 +272,8 @@ const addColumn = () => {
 
 // 删除列
 const removeColumn = (index: number) => {
-  tableConfig.value.columnArr.splice(index, 1);
+  if (!tableConfig.value?.columnArr) tableConfig.value.columnArr = [];
+  tableConfig.value?.columnArr.splice(index, 1);
 };
 
 // 添加操作按钮

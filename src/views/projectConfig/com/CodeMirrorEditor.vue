@@ -27,7 +27,7 @@
       <div class="editor-body">
         <Codemirror
           ref="cmComponentRef"
-          v-model:value="codeMirrorCurrentObject.eventConfigs[eventName]"
+          v-model:value="eventConfigs[eventName]"
           :options="cmOptions"
           border
           height="100%"
@@ -61,26 +61,28 @@ const props = withDefaults(
   defineProps<{
     eventName: string;
     text?: string;
-    codeMirrorCurrentObject: any;
+    // codeMirrorCurrentObject: any;
   }>(),
   {
-    codeMirrorCurrentObject: () => {
-      return {};
-    },
+    // codeMirrorCurrentObject: () => {
+    //   return {};
+    // },
     eventName: "click",
     text: "事件编辑",
   }
 );
-const initialCode = ref<string>(
-  cloneDeep(props.codeMirrorCurrentObject?.eventConfigs?.[props.eventName]) || undefined
-);
+
+const dialogVisible = defineModel({ required: true });
+const eventConfigs = defineModel<Record<string, any>>("eventConfigs", { required: true });
+const event = defineModel<Record<string, any>>("event", { required: true });
+
+const initialCode = ref<string>(cloneDeep(unref(eventConfigs)[props.eventName]) || undefined);
 
 // 计算属性：判断代码是否被修改
 const isModified = computed(() => {
-  return props.codeMirrorCurrentObject?.eventConfigs?.[props.eventName] !== initialCode.value;
+  return unref(eventConfigs)[props.eventName] !== initialCode.value;
 });
 
-const dialogVisible = defineModel({ required: true });
 const editor = useTemplateRef("editor");
 const cmComponentRef = useTemplateRef<any>("cmComponentRef");
 const cmOptions: EditorConfiguration = {
@@ -119,7 +121,7 @@ const closeEditor = async () => {
       type: "warning",
     });
   }
-  props.codeMirrorCurrentObject.eventConfigs[props.eventName] = unref(initialCode);
+  unref(eventConfigs)[props.eventName] = unref(initialCode);
   // 用户确认关闭
   dialogVisible.value = false;
 };
@@ -130,8 +132,8 @@ const saveEditor = () => {
   if (!unref(isModified)) return;
   const codeVal = cmComponentRef?.value.cminstance.getValue();
   if (!codeVal) {
-    delete props.codeMirrorCurrentObject.eventConfigs[props.eventName];
-    delete props.codeMirrorCurrentObject.event[props.eventName];
+    delete unref(eventConfigs)[props.eventName];
+    delete unref(event)[props.eventName];
     return;
   }
   ElMessage({
@@ -139,11 +141,11 @@ const saveEditor = () => {
     type: "success",
   });
   // 行按钮有scope，表格事件都是这里注册
-  props.codeMirrorCurrentObject.event[props.eventName] = ({ args, scope, instance }: any) => {
+  unref(event)[props.eventName] = ({ args, scope, instance }: any) => {
     const context = {
       args,
       eventName: props.eventName,
-      eventConfigs: props.codeMirrorCurrentObject.eventConfigs,
+      eventConfigs: unref(eventConfigs),
       instance,
     };
     if (scope) Object.assign(context, { scope });
@@ -152,7 +154,7 @@ const saveEditor = () => {
 
   emit("save", {
     eventName: props.eventName,
-    codeMirrorCurrentObject: props.codeMirrorCurrentObject,
+    eventConfigs: unref(eventConfigs),
     codeVal: cmComponentRef?.value.cminstance.getValue(),
   });
 };

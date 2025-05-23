@@ -28,7 +28,7 @@
                 v-bind="{ placeholder: item.attr?.placeholder || '请选择', ...item.attr }"
               >
                 <el-option
-                  v-for="opt in item.attr?.options"
+                  v-for="opt in item.attr?.lcOptions"
                   :key="opt.value"
                   :label="opt.label"
                   :value="opt.value"
@@ -40,7 +40,7 @@
                 v-model="searchConfig.data[item.attr?.prop]"
                 filterable
                 remote
-                :remote-method="(q: any) => handleRemoteSearch(item.attr, q)"
+                :remote-method="(q: any) => handleRemoteSearch(item, q)"
                 :loading="!remoteOptionsMap[item.attr?.prop]"
                 clearable
                 v-bind="{ placeholder: item.attr?.placeholder || '请选择', ...item.attr }"
@@ -87,22 +87,24 @@
 <script setup lang="ts">
 import { ref, computed, reactive, watch } from "vue";
 import { ElMessage } from "element-plus";
-import type { ISearchConfig, RemoteSelectConfig } from "./table";
+import type { ISearchConfig } from "./table";
 import type { TableType } from "@/components/BaseTable/index";
 import { SearchTypeEnum } from "@/views/projectConfig/src/index";
+import { LcSearchPropNnum } from "@/views/projectConfig/src/index";
+import { useEventHandler } from "@/hooks";
+import { ComponentInternalInstance } from "vue";
 
 const props = withDefaults(
   defineProps<{
     collapsed?: boolean;
-    // labelWidth?: string;
   }>(),
   {
     collapsed: true, // 默认折叠
-    // labelWidth: "100px", // 默认 label 宽度
   }
 );
 
 const searchConfig = defineModel<Record<string, any>>({ required: true });
+globalThis.setConsole(searchConfig, "searchConfig");
 
 const columnArr = computed(() => unref(searchConfig)?.columnArr || []);
 console.log("运行态数据", searchConfig, columnArr);
@@ -129,42 +131,91 @@ const remoteOptionsMap = reactive<Record<string, any[]>>({});
 
 // 只显示部分项
 const visibleConfig = computed(() => {
-  console.log("搜索框配置", unref(columnArr));
   return collapsed.value ? unref(columnArr).slice(0, unref(rowCount)) : unref(columnArr);
 });
+const {} = useEventHandler();
+const instance = inject("baseTable") as ComponentInternalInstance;
 
 // 远程下拉请求
-async function fetchRemoteOptions(item: RemoteSelectConfig, query = "") {
+const fetchRemoteOptions = async (item: any, query = "") => {
   try {
-    let params = { ...item.queryParams };
-    if (query) params.keyword = query;
-    const url = item.apiUrl;
-    const res = await fetch(url + (query ? `?keyword=${encodeURIComponent(query)}` : ""), {
-      method: "GET",
-    });
-    const data = await res.json();
-    // 兼容labelField/valueField
-    const labelKey = item.labelField || "label";
-    const valueKey = item.valueField || "value";
-    remoteOptionsMap[item.prop] = (data?.data || data).map((d: any) => ({
-      label: d[labelKey],
-      value: d[valueKey],
-    }));
+    // 获取请求参数
+    if (item.customEvent && LcSearchPropNnum.LCREMOTEPARAMS in item.customEvent) {
+      const func = item.customEvent[LcSearchPropNnum.LCREMOTEPARAMS];
+      if (typeof func === "function") {
+        try {
+          // 入参
+          const params = await func({ instance }); // 确保 this 绑定
+          globalThis.setConsole(params, "remoteParams");
+          // 接口
+          const url =
+            item.attr[LcSearchPropNnum.LCREMOTEURL] || "https://jsonplaceholder.typicode.com/posts";
+          const method = item.attr[LcSearchPropNnum.LCMETHOD];
+          fetch(url, {
+            method,
+            body: JSON.stringify([
+              {
+                value: "111",
+                label: "张三",
+              },
+              {
+                value: "222",
+                label: "李四",
+              },
+              {
+                value: "333",
+                label: "王五",
+              },
+            ]),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(8888, data);
+              remoteOptionsMap[item.attr?.prop] = [
+                {
+                  value: "111",
+                  label: "张三",
+                },
+                {
+                  value: "222",
+                  label: "李四",
+                },
+                {
+                  value: "333",
+                  label: "王五",
+                },
+              ];
+            })
+            .catch(() => {
+              remoteOptionsMap[item.attr?.prop] = [];
+            });
+        } catch (error) {
+          console.error("函数执行出错:", error);
+        }
+      } else {
+        console.error("item.customEvent[LcSearchPropNnum.LCREMOTEPARAMS] 不是函数");
+      }
+    } else {
+      console.error("item.customEvent 或 LcSearchPropNnum.LCREMOTEPARAMS 未定义");
+    }
   } catch (e) {
     ElMessage.error("远程下拉数据获取失败");
-    remoteOptionsMap[item.prop] = [];
+    remoteOptionsMap[item.attr?.prop] = [];
   }
-}
+};
 
 // 远程下拉输入时触发
-function handleRemoteSearch(item: RemoteSelectConfig, query: string) {
+function handleRemoteSearch(item: any, query: string) {
   fetchRemoteOptions(item, query);
 }
 
 // 初始化远程下拉
 unref(columnArr).forEach((item: any) => {
   if (item.attr?.lcType === SearchTypeEnum.REMOTESELECT) {
-    fetchRemoteOptions(item as RemoteSelectConfig);
+    fetchRemoteOptions(item as any);
   }
 });
 
@@ -180,6 +231,8 @@ function onReset() {
 function toggleCollapse() {
   collapsed.value = !collapsed.value;
 }
+
+// 事件处理
 </script>
 
 <style lang="scss" scoped>

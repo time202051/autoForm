@@ -88,6 +88,9 @@ import { ElTable, ElTableColumn } from "element-plus";
 import BasicComponent from "./BasicComponent.vue";
 import { useNamespace } from "@/hooks/useNamespace";
 import { useVModel } from "@vueuse/core";
+import { useEventHandler } from "@/hooks";
+import { ComponentInternalInstance } from "vue";
+
 const ns = useNamespace("table");
 const props = defineProps<{
   tableOption: TableType | any;
@@ -195,51 +198,52 @@ const defaultSlotConfigHandle = function (config: CompType) {
 
 const instance = getCurrentInstance();
 const tableRef = useTemplateRef("tableRef");
-const baseTableInstance = inject("baseTable");
+const baseTableInstance = inject("baseTable") as ComponentInternalInstance;
 defineExpose({
   tableRef,
   instance,
 });
-const bindEvents = computed(() => {
-  if (!props.tableOption.event) return {};
-  const events: any = {};
-  Object.entries(props.tableOption.event).forEach(([key, fn]) => {
-    events[key] = (...args: any) => {
-      try {
-        return fn({
-          args,
-          instance: baseTableInstance,
-        });
-      } catch (error: any) {
-        console.error(`事件 ${key} 执行出错:`, error);
-        ElMessage.error(`事件执行出错: ${error?.message}`);
-      }
-    };
-  });
-  return events;
-});
-const bindEventsHandler = (scope: any, config: any) => {
-  if (!config.event) return {};
-  const events: any = {};
-  Object.entries(config.event).forEach(([key, fn]) => {
-    events[key] = ($event: any, ...args: any) => {
-      try {
-        // 防止冒泡
-        $event.stopPropagation();
-        if (!args) args = [$event];
-        return fn({
-          args,
-          scope,
-          instance: baseTableInstance,
-        });
-      } catch (error: any) {
-        console.error(`事件 ${key} 执行出错:`, error);
-        ElMessage.error(`事件执行出错: ${error?.message}`);
-      }
-    };
-  });
-  return events;
-};
+const { bindEvents, bindEventsHandler } = useEventHandler(props, baseTableInstance);
+// const bindEvents = computed(() => {
+//   if (!props.tableOption.event) return {};
+//   const events: any = {};
+//   Object.entries(props.tableOption.event).forEach(([key, fn]: any) => {
+//     events[key] = (...args: any) => {
+//       try {
+//         return fn({
+//           args,
+//           instance: baseTableInstance,
+//         });
+//       } catch (error: any) {
+//         console.error(`事件 ${key} 执行出错:`, error);
+//         ElMessage.error(`事件执行出错: ${error?.message}`);
+//       }
+//     };
+//   });
+//   return events;
+// });
+// const bindEventsHandler = (scope: any, config: any) => {
+//   if (!config.event) return {};
+//   const events: any = {};
+//   Object.entries(config.event).forEach(([key, fn]: any) => {
+//     events[key] = ($event: any, ...args: any) => {
+//       try {
+//         // 防止冒泡
+//         $event.stopPropagation();
+//         if (!args) args = [$event];
+//         return fn({
+//           args,
+//           scope,
+//           instance: baseTableInstance,
+//         });
+//       } catch (error: any) {
+//         console.error(`事件 ${key} 执行出错:`, error);
+//         ElMessage.error(`事件执行出错: ${error?.message}`);
+//       }
+//     };
+//   });
+//   return events;
+// };
 </script>
 
 <style scoped lang="less"></style>

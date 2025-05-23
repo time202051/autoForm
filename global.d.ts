@@ -1,5 +1,5 @@
 declare global {
   interface Window {
-    setEventConsole: () => void;
+    setEventConsole: (eventName: string) => void;
   }
 }

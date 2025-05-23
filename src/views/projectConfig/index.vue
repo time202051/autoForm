@@ -43,6 +43,7 @@ import {
   defaultSearchAttrs,
   defaultSearchColumnAttrs,
 } from "@/views/projectConfig/src/searchConfig";
+import type { IPageConfig } from "@/views/projectConfig/src/pageConfig";
 
 const { getPageData } = useProjectCache();
 
@@ -64,7 +65,7 @@ const showFormConfig = () => {
 };
 
 const loading = ref(false);
-const tableOption = reactive<TableType>({
+const tableOption = reactive<IPageConfig>({
   data: [
     {
       date: "2016-05-03",
@@ -222,8 +223,12 @@ const tableOption = reactive<TableType>({
           prop: "text",
           ...cloneDeep(defaultSearchColumnAttrs),
         },
+        //这些event可以用于当前搜索框组件的事件
         event: {},
         eventConfigs: {},
+        // 自定义事件, 页面中特定的函数
+        customEvent: {},
+        customEventConfigs: {},
       },
       {
         attr: {
@@ -233,6 +238,10 @@ const tableOption = reactive<TableType>({
         },
         event: {},
         eventConfigs: {},
+
+        // 自定义事件, 页面中特定的函数
+        customEvent: {},
+        customEventConfigs: {},
       },
       // {
       //   attr: {

@@ -1,9 +1,9 @@
-import { IAttrConfig, SearchTypeEnum } from '@/views/projectConfig/src/index'
+import { IAttrConfig, SearchTypeEnum, AttrConfigTypeEnum, IAttrConfigType, LcSearchPropNnum } from '@/views/projectConfig/src/index'
 export const searchAttrs: IAttrConfig[] = [
   {
     prop: "labelWidth",
     label: "标签宽度",
-    type: "number",
+    type: AttrConfigTypeEnum.NUMBER,
     description: "设置表单标签的宽度",
     attr: {
       min: 20
@@ -12,13 +12,13 @@ export const searchAttrs: IAttrConfig[] = [
   {
     prop: "autoSearchWidth",
     label: "宽度自适应",
-    type: "boolean",
+    type: AttrConfigTypeEnum.BOOLEAN,
     description: "搜索框宽度占满",
     children: [
       {
         prop: "searchWidth",
         label: "搜索框宽度",
-        type: "number",
+        type: AttrConfigTypeEnum.NUMBER,
         description: "搜索框的宽度",
         attr: {
           min: 200,
@@ -30,7 +30,7 @@ export const searchAttrs: IAttrConfig[] = [
   {
     prop: "rowCount",
     label: "每行显示项数",
-    type: "number",
+    type: AttrConfigTypeEnum.NUMBER,
     description: "设置每行显示的表单项数量",
     attr: {
       min: 1,
@@ -48,7 +48,7 @@ export const searchAttrs: IAttrConfig[] = [
   {
     prop: "gutter",
     label: "间距",
-    type: "number",
+    type: AttrConfigTypeEnum.NUMBER,
     description: "搜索框之间的距离",
     attr: {
       min: 0,
@@ -57,7 +57,7 @@ export const searchAttrs: IAttrConfig[] = [
   {
     prop: "labelPosition",
     label: "标签位置",
-    type: "enum",
+    type: AttrConfigTypeEnum.ENUM,
     description: "表单域标签的位置， 当设置为 left 或 right 时，则也需要设置 label-width 属性",
     options: [
       { label: "左侧", value: "left" },
@@ -68,7 +68,7 @@ export const searchAttrs: IAttrConfig[] = [
   {
     prop: "size",
     label: "尺寸",
-    type: "enum",
+    type: AttrConfigTypeEnum.ENUM,
     description: "用于控制该表单内组件的尺寸",
     options: [
       { label: "大", value: "large" },
@@ -95,19 +95,19 @@ export const searchColumnAttrs: IAttrConfig[] = [
   {
     prop: "label",
     label: "标题",
-    type: "string",
+    type: AttrConfigTypeEnum.STRING,
     description: "设置表单项的字段名",
   },
   {
     prop: "prop",
     label: "字段",
-    type: "string",
+    type: AttrConfigTypeEnum.STRING,
     description: "双向绑定,传入查询接口的键名",
   },
   {
-    prop: "lcType",
+    prop: LcSearchPropNnum.lCTYPE,
     label: "类型",
-    type: "enum",
+    type: AttrConfigTypeEnum.ENUM,
     options: [
       { label: "输入框", value: SearchTypeEnum.INPUT },
       { label: "本地下拉", value: SearchTypeEnum.LOCALSELECT },
@@ -125,25 +125,41 @@ export const searchColumnAttrs: IAttrConfig[] = [
     children: {
       [SearchTypeEnum.LOCALSELECT]: [
         {
-          prop: "lcDict",
+          prop: LcSearchPropNnum.lCDICT,
           label: "字典数据",
-          type: "string",
+          type: AttrConfigTypeEnum.STRING,
           description: "通过字典获取下拉框数据",
         },
         {
-          prop: "options",
+          prop: LcSearchPropNnum.LCOPTIONS,
           label: "下拉框选项",
-          type: "array",
+          type: AttrConfigTypeEnum.ARRAY,
           description: "本地手动配置的下拉框静态数据,label:展示文本,value:实际值",
           show: (modelValue: any) => !modelValue.lcDict,
         },
       ],
       [SearchTypeEnum.REMOTESELECT]: [
         {
-          prop: "lcUrl",
+          prop: LcSearchPropNnum.LCREMOTEURL,
           label: "url",
-          type: "string",
-          description: "远程下拉框接口地址",
+          type: AttrConfigTypeEnum.STRING,
+          description: "远程下拉框接口地址,例:/api/xxx",
+        },
+        {
+          prop: LcSearchPropNnum.LCMETHOD,
+          label: "请求类型",
+          type: AttrConfigTypeEnum.ENUM,
+          options: [
+            { label: "GET", value: "GET" },
+            { label: "POST", value: "POST" },
+          ],
+          description: "url接口请求类型",
+        },
+        {
+          prop: LcSearchPropNnum.LCREMOTEPARAMS,
+          label: "参数",
+          type: AttrConfigTypeEnum.EDITOR,
+          description: "返回的url接口参数,注意: 如含有异步请返回promise",
         },
       ]
     },
@@ -157,5 +173,5 @@ export const searchColumnAttrs: IAttrConfig[] = [
 ];
 
 export const defaultSearchColumnAttrs = {
-  lcType: 'input'
+  lcType: SearchTypeEnum.INPUT
 }

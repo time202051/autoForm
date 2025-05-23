@@ -8,7 +8,9 @@ import { ElMessage } from 'element-plus';
 import type {
   IEventParams,
 } from "@/views/projectConfig/src/pageConfig.ts";
-import { eventHandler } from "@/utils/eventHandler";
+// import { eventHandler } from "@/utils/eventHandler";
+import { useEventHandler } from '@/hooks'
+
 export const hasEvents = readonly(['defaultSlotConfig', 'headerSlotConfig']);
 
 // 基础菜单数据结构
@@ -35,13 +37,14 @@ let instance: ReturnType<typeof createProjectCache> | null = null;
 // 创建 useProjectCache 的逻辑
 function createProjectCache() {
   const userStore = createStore('projectCache', 'projectConfig');
-  const route = useRoute();
   const projectStore = useProjectStore();
+  const route = useRoute();
+  const { setEvent, setScopeEvent } = useEventHandler()
 
-  // 当前页面数据
+  // // 当前页面数据
   const pageData = ref<TableType | null>(null);
   const menuPageData = ref<IMenuPageData[]>([]);
-
+  // const getPageData = () => { };
   // 获取页面数据
   const getPageData = async (): Promise<TableType | null> => {
     const projectId = projectStore.selectedProject?.id || "";
@@ -68,24 +71,8 @@ function createProjectCache() {
 
     const pageConfig = findPageConfig(projectCache);
     if (!pageConfig) return null;
-
-    const ctx = getCurrentInstance() as ComponentInternalInstance;
-
     // 还原事件函数
-    pageConfig.event = {};
-
-    Object.keys(pageConfig.eventConfigs).forEach((eventName) => {
-      globalThis.setEventConsole(eventName)
-      pageConfig.event[eventName] = ({ args, instance }: any) => {
-        return eventHandler({
-          eventName,
-          eventConfigs: pageConfig.eventConfigs,
-          args, // 传递事件参数
-          instance,
-        })
-      }
-    });
-
+    setEvent(pageConfig.event || {}, pageConfig.eventConfigs)
 
 
     // 这是table内部的事件，注意有scope
@@ -97,41 +84,24 @@ function createProjectCache() {
             if (Array.isArray(column[key])) {
               column[key].forEach((item, index) => {
                 if (typeof item === 'object' && item.event) {
-                  if (!item.event) item.event = {};
-                  Object.keys(item.eventConfigs).forEach((eventName) => {
-                    globalThis.setEventConsole(eventName)
-                    item.event[eventName] = ({ args, scope, instance }: any) => {
-                      return eventHandler({
-                        args, // 传递事件参数
-                        eventName,
-                        eventConfigs: item.eventConfigs,
-                        instance,
-                        scope
-                      })
-                    }
-                  })
+                  setScopeEvent(item.event, item.eventConfigs)
                 }
               })
             } else if (typeof column[key] === 'object' && column[key].event) {
-              column[key].event = {};
-              Object.keys(column[key].eventConfigs).forEach((eventName) => {
-                globalThis.setEventConsole(eventName)
-                column[key].event[eventName] = ({ args, scope, instance }: any) => {
-                  return eventHandler({
-                    eventName,
-                    eventConfigs: column[key].eventConfigs,
-                    args, // 传递事件参数
-                    instance,
-                    scope
-                  })
-                }
-              })
+              setScopeEvent(column[key].event, column[key].eventConfigs)
             }
           }
         })
       })
     }
 
+
+    // 搜索框自定义事件事件处理
+    if (pageConfig.searchConfig && pageConfig.searchConfig.columnArr && pageConfig.searchConfig.columnArr.length > 0) {
+      pageConfig.searchConfig.columnArr.forEach((item: any) => {
+        setEvent(item.customEvent, item.customEventConfigs)
+      })
+    }
     return pageConfig;
   };
 
