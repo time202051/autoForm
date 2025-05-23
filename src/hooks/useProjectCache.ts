@@ -1,6 +1,6 @@
 import { watchEffect, ref, getCurrentInstance } from "vue";
 import type { ComponentInternalInstance } from "vue";
-import type { TableType } from "@/components/BaseTable/index";
+// import type { TableType } from "@/components/BaseTable/index";
 import { useRoute } from "vue-router";
 import { useProjectStore } from "@/store/modules/project.store";
 import { createStore, get, set, del } from 'idb-keyval';
@@ -8,6 +8,7 @@ import { ElMessage } from 'element-plus';
 import type {
   IEventParams,
 } from "@/views/projectConfig/src/pageConfig.ts";
+import type { IPageConfig } from '@/views/projectConfig/src/pageConfig'
 // import { eventHandler } from "@/utils/eventHandler";
 import { useEventHandler } from '@/hooks'
 
@@ -26,7 +27,7 @@ interface IBaseMenuData {
 
 // 完整的菜单页面数据结构（包含配置信息）
 interface IMenuPageData extends IBaseMenuData {
-  pageConfig?: TableType; // 页面配置数据
+  pageConfig?: IPageConfig; // 页面配置数据
   // 后期可以在这里扩展其他配置属性
   // otherConfig?: xxx;
 }
@@ -39,14 +40,14 @@ function createProjectCache() {
   const userStore = createStore('projectCache', 'projectConfig');
   const projectStore = useProjectStore();
   const route = useRoute();
-  const { setEvent, setScopeEvent } = useEventHandler()
+  const { setEvent, setScopeEvent, setActionBarClick } = useEventHandler()
 
   // // 当前页面数据
-  const pageData = ref<TableType | null>(null);
+  const pageData = ref<IPageConfig | null>(null);
   const menuPageData = ref<IMenuPageData[]>([]);
   // const getPageData = () => { };
   // 获取页面数据
-  const getPageData = async (): Promise<TableType | null> => {
+  const getPageData = async (): Promise<IPageConfig | null> => {
     const projectId = projectStore.selectedProject?.id || "";
     const pageId = (route.meta.id as string) || "";
 
@@ -56,7 +57,7 @@ function createProjectCache() {
     if (!projectCache) return null;
 
     // 递归查找页面配置
-    const findPageConfig = (menus: IMenuPageData[]): TableType | null => {
+    const findPageConfig = (menus: IMenuPageData[]): IPageConfig | null => {
       for (const menu of menus) {
         if (menu.id === pageId) {
           return menu.pageConfig || null;
@@ -95,18 +96,24 @@ function createProjectCache() {
       })
     }
 
-
     // 搜索框自定义事件事件处理
     if (pageConfig.searchConfig && pageConfig.searchConfig.columnArr && pageConfig.searchConfig.columnArr.length > 0) {
       pageConfig.searchConfig.columnArr.forEach((item: any) => {
         setEvent(item.customEvent, item.customEventConfigs)
       })
     }
+
+    if (pageConfig.actionBarConfig && pageConfig.actionBarConfig.columnArr && pageConfig.actionBarConfig.columnArr.length > 0) {
+      pageConfig.actionBarConfig.columnArr.forEach((item: any) => {
+        setActionBarClick(item.event, item.eventConfigs)
+      })
+    }
+
     return pageConfig;
   };
 
   // 保存页面数据
-  const savePageData = async (data: TableType) => {
+  const savePageData = async (data: IPageConfig) => {
     const projectId = projectStore.selectedProject?.id || "";
     const pageId = (route?.meta?.id as string) || "";
 
@@ -165,7 +172,7 @@ function createProjectCache() {
       menus.forEach(menu => {
         newIds.add(menu.id);
         // 查找旧的页面配置
-        const findOldConfig = (oldMenus: IMenuPageData[]): TableType | undefined => {
+        const findOldConfig = (oldMenus: IMenuPageData[]): IPageConfig | undefined => {
           for (const oldMenu of oldMenus) {
             if (oldMenu.id === menu.id) {
               return oldMenu.pageConfig;

@@ -2,7 +2,7 @@
   <div class="search-config">
     <el-tabs v-model="activeName" class="demo-tabs">
       <el-tab-pane label="属性" name="attrName">
-        <el-collapse v-model="activeCollapse">
+        <el-collapse v-model="activeCollapse" accordion>
           <el-collapse-item title="基础属性" name="basic">
             <AttrConfigForm
               :attrs="searchAttrs"

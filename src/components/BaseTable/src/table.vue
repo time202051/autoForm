@@ -203,7 +203,10 @@ defineExpose({
   tableRef,
   instance,
 });
-const { bindEvents, bindEventsHandler } = useEventHandler(props, baseTableInstance);
+const { bindEvents, bindEventsHandler } = useEventHandler(
+  props.tableOption,
+  baseTableInstance
+);
 // const bindEvents = computed(() => {
 //   if (!props.tableOption.event) return {};
 //   const events: any = {};

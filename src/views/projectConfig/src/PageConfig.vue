@@ -6,9 +6,13 @@
         v-if="selectedModule == ModuleTypeEnum.SEARCH"
         v-model="tableConfig.searchConfig"
       ></SearchConfigCom>
+      <ActionBarConfigCom
+        v-else-if="selectedModule == ModuleTypeEnum.ACTIONBAR"
+        v-model="tableConfig.actionBarConfig"
+      ></ActionBarConfigCom>
       <el-tabs v-else v-model="activeName" class="demo-tabs">
         <el-tab-pane label="属性" name="attrName">
-          <el-collapse v-model="activeCollapse">
+          <el-collapse v-model="activeCollapse" accordion>
             <!-- 基础属性配置 -->
             <el-collapse-item title="基础属性" name="basic">
               <el-form label-position="left" label-width="120px">
@@ -200,6 +204,7 @@ import type { IPageConfig } from "./pageConfig";
 import SearchConfigCom from "./SearchConfig.vue";
 import { useProjectStore } from "@/store";
 import { ModuleTypeEnum } from "@/views/projectConfig/src/pageConfig";
+import ActionBarConfigCom from "@/views/projectConfig/src/ActionBarConfig.vue";
 
 // const props = withDefaults(
 //   defineProps<{

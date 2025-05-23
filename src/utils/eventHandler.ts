@@ -69,7 +69,7 @@ interface IEventHandler {
  * @returns 事件执行结果
  */
 export const eventHandler = (options: IEventHandler) => {
-  const { eventName, eventConfigs, args, instance, scope } = options;
+  const { eventName, eventConfigs, args, instance, scope, tableRef, selectionRows } = options;
   console.log(
     `%c[事件触发]${eventName}%c`,
     'color: white; background: green; padding: 2px 4px; border-radius: 3px;',
@@ -82,6 +82,8 @@ export const eventHandler = (options: IEventHandler) => {
       tableConfig: instance?.proxy?.tableConfig || {},
     };
     if (scope) Object.assign(context, { scope });
+    if (tableRef) Object.assign(context, { tableRef });
+    if (selectionRows) Object.assign(context, { selectionRows });
 
     Object.setPrototypeOf(context, utils);
     return new Function('context', 'args', `

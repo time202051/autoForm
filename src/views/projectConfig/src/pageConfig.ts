@@ -2,6 +2,8 @@ import { IAttrConfig } from '@/views/projectConfig/src/index'
 import type { TableType } from '@/components/BaseTable'
 import type { ComponentInternalInstance } from "vue";
 import type { TableColumnType, ISearchConfig } from '@/components/BaseTable/src/table'
+import type { IActionBarConfig } from '@/views/projectConfig/src/actionBarConfig'
+
 export interface TableScope {
   row: any; // 当前行数据
   $index: number; // 当前行索引
@@ -478,12 +480,12 @@ export const tableColumnAttrs: IAttrConfig[] = [
     default: false,
     description: '数据刷新后是否保留选项，仅对 type=selection 的列有效，请注意，需指定 row-key 来让这个功能生效。',
   },
-  {
-    prop: 'filters',
-    label: '过滤选项',
-    type: 'array',
-    description: '数据过滤的选项，数组格式，数组中的元素需要有 text 和 value 属性。',
-  },
+  // {
+  //   prop: 'filters',
+  //   label: '过滤选项',
+  //   type: 'array',
+  //   description: '数据过滤的选项，数组格式，数组中的元素需要有 text 和 value 属性。',
+  // },
   {
     prop: 'filterPlacement',
     label: '过滤弹出框定位',
@@ -579,6 +581,6 @@ export interface IPageConfig {
   eventConfigs?: any;//存储事件
   searchConfig?: ISearchConfig;
   // formConfigs: IFormConfig[]; //用于表单
-  // actionBarConfigs: IActionBarConfig[];//用于操作栏,新增，批量删除，导入导出等按钮
+  actionBarConfig?: IActionBarConfig;//用于操作栏,新增，批量删除，导入导出等按钮
   [attrName: string]: any;
 }

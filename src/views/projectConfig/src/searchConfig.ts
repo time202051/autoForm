@@ -81,6 +81,31 @@ export const searchAttrs: IAttrConfig[] = [
   },
 ];
 
+const selectBase = [
+  {
+    prop: 'multiple',
+    label: "多选",
+    type: AttrConfigTypeEnum.BOOLEAN,
+    description: "是否多选",
+    children: {
+      true: [
+        {
+          prop: 'multipleLimit',
+          label: "最多选择数",
+          type: AttrConfigTypeEnum.NUMBER,
+          description: "multiple 属性设置为 true 时，代表多选场景下用户最多可以选择的项目数， 为 0 则不限制",
+          attr: {
+            min: 0,
+            max: 10,
+            step: 1,
+          }
+        },
+      ]
+    }
+  },
+]
+
+
 //搜索框默认的属性
 export const defaultSearchAttrs = {
   autoSearchWidth: true,
@@ -137,6 +162,7 @@ export const searchColumnAttrs: IAttrConfig[] = [
           description: "本地手动配置的下拉框静态数据,label:展示文本,value:实际值",
           show: (modelValue: any) => !modelValue.lcDict,
         },
+        ...selectBase
       ],
       [SearchTypeEnum.REMOTESELECT]: [
         {
@@ -161,6 +187,29 @@ export const searchColumnAttrs: IAttrConfig[] = [
           type: AttrConfigTypeEnum.EDITOR,
           description: "返回的url接口参数,注意: 如含有异步请返回promise",
         },
+        {
+          prop: 'remote',
+          label: "远程",
+          type: AttrConfigTypeEnum.BOOLEAN,
+          description: "其中的选项是否从服务器远程加载",
+        },
+        ...selectBase
+      ],
+      [SearchTypeEnum.DATE]: [
+        {
+          prop: 'type',
+          label: "显示类型",
+          type: AttrConfigTypeEnum.ENUM,
+          description: "范围选择时开始日期的占位内容",
+          options: [
+            { label: "日期", value: 'date' },
+            { label: "日期范围", value: 'daterange' },
+            { label: "月份范围", value: 'monthrange' },
+            { label: "年份日期", value: 'yearrange' },
+            { label: "时间", value: 'datetime' },
+            { label: "范围时间", value: 'datetimerange' },
+          ],
+        },
       ]
     },
   },
@@ -175,3 +224,5 @@ export const searchColumnAttrs: IAttrConfig[] = [
 export const defaultSearchColumnAttrs = {
   lcType: SearchTypeEnum.INPUT
 }
+
+

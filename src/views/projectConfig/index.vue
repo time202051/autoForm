@@ -3,7 +3,7 @@
     <!-- 左侧内容 -->
     <div class="left-content">
       <!-- <BaseTable v-model="tableOption"></BaseTable> -->
-      <BaseTable v-model:tableConfig="tableOption" v-model:buttons="buttons"></BaseTable>
+      <BaseTable v-model:tableConfig="tableOption"></BaseTable>
     </div>
     <!-- 右侧面板 -->
     <div class="right-panel" v-show="isPanelOpen">
@@ -292,23 +292,27 @@ const tableOption = reactive<IPageConfig>({
     event: {},
     eventConfigs: {},
   },
+  actionBarConfig: {
+    attr: {},
+    columnArr: [
+      {
+        attr: {
+          label: "自定义按钮",
+          type: "primary",
+        },
+        //这些event可以用于当前搜索框组件的事件
+        event: {},
+        eventConfigs: {},
+        // 自定义事件, 页面中特定的函数
+        customEvent: {},
+        customEventConfigs: {},
+      },
+    ],
+    data: {},
+    event: {},
+    eventConfigs: {},
+  },
 });
-const buttons = ref<any>([
-  {
-    label: "新建",
-    type: "primary",
-    attr: {},
-    event: {},
-    eventConfigs: {},
-  },
-  {
-    label: "批量删除",
-    type: "danger",
-    attr: {},
-    event: {},
-    eventConfigs: {},
-  },
-]);
 
 const init = async () => {
   const data = await getPageData();

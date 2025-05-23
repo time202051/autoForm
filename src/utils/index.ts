@@ -1,3 +1,6 @@
+export * from './DictionaryService';
+export * from './console';
+export * from './eventHandler';
 /**
  * Check if an element has a class
  * @param {HTMLElement} ele

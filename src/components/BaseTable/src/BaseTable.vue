@@ -20,10 +20,15 @@
       ]"
       @click="projectStore.setSelectedModule(ModuleTypeEnum.ACTIONBAR)"
     >
+      <ActionBar v-model="tableConfig.actionBarConfig" :tableRef="LCTableRef"></ActionBar>
       <!-- 动态渲染按钮 -->
-      <el-button v-for="(button, index) in buttons" :key="index" :type="button.type">
-        {{ button.label }}
-      </el-button>
+      <!-- <el-button
+        v-for="(button, index) in tableConfig.actionBarConfig.columnArr"
+        :key="index"
+        :type="button.attr.type"
+      >
+        {{ button.attr.label }}
+      </el-button> -->
     </div>
 
     <!-- 表格 -->
@@ -75,18 +80,13 @@ import SearchForm from "./SearchForm.vue";
 import { ISearchConfig } from "@/components/BaseTable/src/table";
 import { useProjectStore } from "@/store";
 import { ModuleTypeEnum } from "@/views/projectConfig/src/pageConfig";
-
-// 定义按钮配置类型
-interface ButtonConfig {
-  label: string; // 按钮文本
-  type: "primary" | "success" | "warning" | "danger" | "info" | "text"; // 按钮类型
-  [key: string]: any; // 其他属性
-}
+import ActionBar from "@/components/BaseTable/src/ActionBar.vue";
+// import { IActionBarConfig } from "@/views/projectConfig/src/actionBarConfig";
 
 //为了instance中名称一致，都叫tableConfig
 const tableConfig = defineModel<any>("tableConfig", { required: true });
 
-const buttons = defineModel<ButtonConfig[]>("buttons", { required: true });
+// const actionBarConfig = defineModel<IActionBarConfig>("actionBarConfig", { required: true });
 const ns = useNamespace("baseTable");
 
 // 分页相关状态

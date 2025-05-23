@@ -5,6 +5,7 @@ import { setupRouter } from "@/router";
 import { setupStore } from "@/store";
 import { setupElIcons } from "./icons";
 import { setupPermission } from "./permission";
+import DictAPI, { DictPageQuery, DictPageVO, DictForm } from "@/api/system/dict.api";
 
 export default {
   install(app: App<Element>) {
@@ -18,5 +19,9 @@ export default {
     setupElIcons(app);
     // 路由守卫
     setupPermission();
+
+    const init = async () => {
+    }
+    init()
   },
 };

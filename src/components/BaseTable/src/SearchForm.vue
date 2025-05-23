@@ -38,12 +38,15 @@
               <el-select
                 v-else-if="item.attr?.lcType == SearchTypeEnum.REMOTESELECT"
                 v-model="searchConfig.data[item.attr?.prop]"
-                filterable
-                remote
                 :remote-method="(q: any) => handleRemoteSearch(item, q)"
                 :loading="!remoteOptionsMap[item.attr?.prop]"
                 clearable
-                v-bind="{ placeholder: item.attr?.placeholder || '请选择', ...item.attr }"
+                filterable
+                v-bind="{
+                  remote: true,
+                  placeholder: item.attr?.placeholder || '请选择',
+                  ...item.attr,
+                }"
               >
                 <el-option
                   v-for="opt in remoteOptionsMap[item.attr?.prop] || []"
@@ -138,6 +141,8 @@ const instance = inject("baseTable") as ComponentInternalInstance;
 
 // 远程下拉请求
 const fetchRemoteOptions = async (item: any, query = "") => {
+  // query是输入框的值,可以做远程的模糊查询,后面有接口再加
+
   try {
     // 获取请求参数
     if (item.customEvent && LcSearchPropNnum.LCREMOTEPARAMS in item.customEvent) {
@@ -151,6 +156,7 @@ const fetchRemoteOptions = async (item: any, query = "") => {
           const url =
             item.attr[LcSearchPropNnum.LCREMOTEURL] || "https://jsonplaceholder.typicode.com/posts";
           const method = item.attr[LcSearchPropNnum.LCMETHOD];
+          //后期替换接口
           fetch(url, {
             method,
             body: JSON.stringify([

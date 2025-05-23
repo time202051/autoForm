@@ -100,11 +100,7 @@
         </div>
 
         <div v-else-if="item.type === 'editor'" class="object-editor">
-          <el-button
-            type="primary"
-            size="small"
-            @click="codeMirrorOpen(LcSearchPropNnum.LCREMOTEPARAMS)"
-          >
+          <el-button type="primary" size="small" @click="codeMirrorOpen(item.prop)">
             <el-icon><Plus /></el-icon>
             参数编辑
           </el-button>
@@ -198,17 +194,9 @@ const addArrayItem = (prop: string) => {
   if (!modelValue.value[prop]) {
     modelValue.value[prop] = [];
   }
-
-  // 检查 value 是否唯一
   const newValue = { label: "", value: "" };
-  const isValueUnique = !modelValue.value[prop].some((item: any) => item.value === newValue.value);
-
-  if (!isValueUnique) {
-    ElMessage.warning("value 值不能重复，请修改后重试");
-    return;
-  }
-
   modelValue.value[prop].push(newValue);
+  openEditDialog(prop, modelValue.value[prop].length - 1); // 打开新添加的项
 };
 
 // 打开编辑弹框
