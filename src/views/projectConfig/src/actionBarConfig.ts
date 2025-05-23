@@ -39,6 +39,12 @@ export const actionBarColumnAttrs: IAttrConfig[] = [
     ]
   },
   {
+    prop: "click",
+    label: "点击逻辑",
+    type: AttrConfigTypeEnum.EDITOR,
+    description: "点击事件逻辑",
+  },
+  {
     prop: "plain",
     label: "朴素",
     type: AttrConfigTypeEnum.BOOLEAN,
@@ -74,12 +80,7 @@ export const actionBarColumnAttrs: IAttrConfig[] = [
     type: AttrConfigTypeEnum.STRING,
     description: "自定义按钮颜色, 并自动计算 hover 和 active 触发后的颜色",
   },
-  {
-    prop: "click",
-    label: "点击逻辑",
-    type: AttrConfigTypeEnum.EDITOR,
-    description: "点击事件逻辑",
-  },
+
 ]
 
 
