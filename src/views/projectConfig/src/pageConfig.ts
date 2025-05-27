@@ -572,6 +572,12 @@ export enum ModuleTypeEnum {
   PAGINATION = 'pagination',
   EMPTY = ''
 }
+
+export interface IPaginationConfig {
+  currentPage: number;
+  pageSize: number;
+  total: number;
+}
 // 表格配置
 export interface IPageConfig {
   data?: Array<Recordable>;
@@ -582,5 +588,6 @@ export interface IPageConfig {
   searchConfig?: ISearchConfig;
   // formConfigs: IFormConfig[]; //用于表单
   actionBarConfig?: IActionBarConfig;//用于操作栏,新增，批量删除，导入导出等按钮
+  pagination: IPaginationConfig;
   [attrName: string]: any;
 }

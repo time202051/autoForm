@@ -37,7 +37,7 @@ export const searchAttrs: IAttrConfig[] = [
       max: 6,
       step: 1,
       precision: 0, // 确保输入整数
-      onChange: (modelValue: Record<string, any>, val: number) => {
+      onChange: ({ modelValue, val }: any) => {
         if (modelValue?.rowCount === 5) {
           modelValue.rowCount = 4;
           ElMessage.info('每行显示项数只能为1、2、3、4、6')

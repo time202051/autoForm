@@ -17,8 +17,7 @@ export interface IActionBarConfig {
   eventConfigs?: Recordable, //存储事件
 }
 
-export const defaultActionBarAttrs = {}
-export const actionBarColumnAttrs: IAttrConfig[] = [
+const btnBase = [
   {
     prop: "label",
     label: "文本",
@@ -39,12 +38,6 @@ export const actionBarColumnAttrs: IAttrConfig[] = [
     ]
   },
   {
-    prop: "click",
-    label: "点击逻辑",
-    type: AttrConfigTypeEnum.EDITOR,
-    description: "点击事件逻辑",
-  },
-  {
     prop: "plain",
     label: "朴素",
     type: AttrConfigTypeEnum.BOOLEAN,
@@ -58,7 +51,7 @@ export const actionBarColumnAttrs: IAttrConfig[] = [
   },
   {
     prop: "link",
-    label: "朴素",
+    label: "链接按钮",
     type: AttrConfigTypeEnum.BOOLEAN,
     description: "是否为链接按钮",
   },
@@ -80,7 +73,42 @@ export const actionBarColumnAttrs: IAttrConfig[] = [
     type: AttrConfigTypeEnum.STRING,
     description: "自定义按钮颜色, 并自动计算 hover 和 active 触发后的颜色",
   },
-
+]
+const btnCustom = [
+  {
+    prop: "click",
+    label: "点击逻辑",
+    type: AttrConfigTypeEnum.EDITOR,
+    description: "点击事件逻辑",
+  },
 ]
 
-
+export const defaultActionBarAttrs = {}
+export const actionBarColumnAttrs: IAttrConfig[] = [
+  {
+    prop: "lcBtnType",
+    label: "类型",
+    type: AttrConfigTypeEnum.ENUM,
+    description: "按钮类型",
+    options: [
+      { label: '新建', value: 0 },
+      { label: '编辑', value: 1 },
+      { label: '删除', value: 2 },
+      { label: '批量删除', value: 3 },
+      { label: '导入', value: 4 },
+      { label: '导出', value: 5 },
+      { label: '自定义按钮', value: 6 },
+    ],
+    attr: {
+      onChange: (e: any) => {
+        console.log(112233, e);
+      }
+    },
+    children: {
+      6: [
+        ...btnCustom
+      ]
+    }
+  },
+  ...btnBase
+]

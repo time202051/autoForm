@@ -18,6 +18,8 @@ import "animate.css";
 
 // 自动为某些默认事件（如 touchstart、wheel 等）添加 { passive: true },提升滚动性能并消除控制台的非被动事件监听警告
 import "default-passive-events";
+import { setupDesignerExtensions } from "./designer-extensions";
+
 setupElementPlus();
 const app = createApp(App);
 // 注册插件
@@ -28,4 +30,7 @@ app.mount("#app");
 globalThis.setEventConsole = setEventConsole
 globalThis.setConsole = setConsole
 
+
+// 执行扩展函数
+setupDesignerExtensions();
 

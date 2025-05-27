@@ -8,8 +8,7 @@
       ]"
       @click="projectStore.setSelectedModule(ModuleTypeEnum.SEARCH)"
     >
-      <!-- v-model="formModel" -->
-      <SearchForm v-model="tableConfig.searchConfig" @search="handleSearch" @reset="handleReset" />
+      <SearchForm v-model="tableConfig.searchConfig!" @search="handleSearch" @reset="handleReset" />
     </div>
     <!-- 顶部操作按钮 actionBar-->
     <div
@@ -20,15 +19,7 @@
       ]"
       @click="projectStore.setSelectedModule(ModuleTypeEnum.ACTIONBAR)"
     >
-      <ActionBar v-model="tableConfig.actionBarConfig" :tableRef="LCTableRef"></ActionBar>
-      <!-- 动态渲染按钮 -->
-      <!-- <el-button
-        v-for="(button, index) in tableConfig.actionBarConfig.columnArr"
-        :key="index"
-        :type="button.attr.type"
-      >
-        {{ button.attr.label }}
-      </el-button> -->
+      <ActionBar v-model="tableConfig.actionBarConfig!" :tableRef="LCTableRef"></ActionBar>
     </div>
 
     <!-- 表格 -->
@@ -40,12 +31,7 @@
       ]"
       @click="projectStore.setSelectedModule(ModuleTypeEnum.TABLE)"
     >
-      <LCTable
-        ref="LCTableRef"
-        :tableOption="tableConfig"
-        v-bind="$attrs"
-        @selection-change="handleSelectionChange"
-      ></LCTable>
+      <LCTable ref="LCTableRef" :tableOption="tableConfig" v-bind="$attrs"></LCTable>
     </div>
 
     <!-- 分页 -->
@@ -59,20 +45,35 @@
     >
       <el-pagination
         ref="paginationRef"
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
+        v-model:current-page="tableConfig.pagination.currentPage"
+        v-model:page-size="tableConfig.pagination.pageSize"
         :page-sizes="[10, 20, 50, 100]"
-        :total="total"
+        :total="tableConfig.pagination.total"
         layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
+        @current-change="handlePageChange"
       />
     </div>
+    <el-dialog
+      v-model="dialogFormData.visible"
+      :title="dialogFormData.title"
+      :close-on-press-escape="false"
+      :close-on-click-modal="false"
+      draggable
+    >
+      <DialogForm v-if="dialogFormData.visible" :dialogFormData></DialogForm>
+      <!-- <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialogFormData.visible = false">取消</el-button>
+          <el-button type="primary" @click="dialogFormData.visible = false">确定</el-button>
+        </div>
+      </template> -->
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue";
+import { ref, useTemplateRef, getCurrentInstance, provide } from "vue";
 import LCTable from "./table.vue";
 import type { TableType } from "@/components/BaseTable/index";
 import { useNamespace } from "@/hooks/useNamespace";
@@ -81,47 +82,24 @@ import { ISearchConfig } from "@/components/BaseTable/src/table";
 import { useProjectStore } from "@/store";
 import { ModuleTypeEnum } from "@/views/projectConfig/src/pageConfig";
 import ActionBar from "@/components/BaseTable/src/ActionBar.vue";
-// import { IActionBarConfig } from "@/views/projectConfig/src/actionBarConfig";
+import { useCrudOperations } from "@/hooks";
+import type { IPageConfig } from "@/views/projectConfig/src/pageConfig";
+import DialogForm from "@/components/BaseTable/src/DialogForm.vue";
+// 为了 instance 中名称一致，都叫 tableConfig
+const tableConfig = defineModel<IPageConfig>("tableConfig", { required: true });
 
-//为了instance中名称一致，都叫tableConfig
-const tableConfig = defineModel<any>("tableConfig", { required: true });
-
-// const actionBarConfig = defineModel<IActionBarConfig>("actionBarConfig", { required: true });
 const ns = useNamespace("baseTable");
+const { dialogFormData, handleSearch, handleReset, handleSizeChange, handlePageChange } =
+  useCrudOperations();
 
-// 分页相关状态
-const currentPage = ref(1); // 当前页码
-const pageSize = ref(10); // 每页显示条数
-const total = ref(100); // 总条数（根据实际数据动态更新）
-
-// 选中行数据
-const selectedRows = ref<any[]>([]);
-
-// 处理表格选中行变化
-const handleSelectionChange = (rows: any[]) => {
-  selectedRows.value = rows;
-};
-
-// 处理每页条数变化
-const handleSizeChange = (size: number) => {
-  pageSize.value = size;
-  fetchData(); // 重新获取数据
-};
-
-// 处理页码变化
-const handleCurrentChange = (page: number) => {
-  currentPage.value = page;
-  fetchData(); // 重新获取数据
-};
-
-// 模拟获取数据
-const fetchData = () => {
-  console.log("获取数据：", {
-    page: currentPage.value,
-    size: pageSize.value,
-  });
-  // 在这里调用 API 获取数据，并更新表格和 total
-};
+// 初始化分页数据
+if (!tableConfig.value.pagination) {
+  tableConfig.value.pagination = {
+    currentPage: 1, // 当前页码
+    pageSize: 20, // 每页显示条数
+    total: 100, // 总条数（根据实际数据动态更新）
+  };
+}
 
 const instance = getCurrentInstance();
 const paginationRef = useTemplateRef("paginationRef");
@@ -133,27 +111,7 @@ defineExpose({
   LCTableRef,
 });
 
-// 表单数据
-const formModel = ref({
-  // name: "",
-  // gender: "",
-  // department: "",
-  // dateRange: [],
-});
-
-// 查询事件
-function handleSearch(params: any) {
-  console.log("查询参数:", params, formModel);
-}
-
-// 重置事件
-function handleReset() {
-  console.log("表单已重置");
-}
-
 const projectStore = useProjectStore();
-
-// const { selectedModule, handleModuleClick, rightPanelContent } = useModuleSelection();
 </script>
 
 <style lang="scss" scoped>
@@ -171,7 +129,6 @@ const projectStore = useProjectStore();
   }
 
   .table-pagination {
-    // margin-top: 16px;
     text-align: right;
   }
 }

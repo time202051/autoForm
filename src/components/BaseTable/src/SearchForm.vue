@@ -229,9 +229,10 @@ function onSearch() {
   emit("search", unref(searchConfig));
 }
 function onReset() {
-  Object.keys(unref(searchConfig).data).forEach(
-    (key: string) => (unref(searchConfig).data[key] = undefined)
-  );
+  // 放到hook统一处理
+  // Object.keys(unref(searchConfig).data).forEach(
+  //   (key: string) => (unref(searchConfig).data[key] = undefined)
+  // );
   emit("reset");
 }
 function toggleCollapse() {
@@ -253,7 +254,6 @@ function toggleCollapse() {
 }
 .search-form {
   padding: 12px 16px 0 16px;
-  background: #fff;
   flex: 1;
   .el-form-item {
     margin-bottom: 16px;

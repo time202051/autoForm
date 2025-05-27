@@ -2,39 +2,35 @@
   <div :class="ns.b()">
     <!-- 左侧内容 -->
     <div class="left-content">
-      <!-- <BaseTable v-model="tableOption"></BaseTable> -->
-      <BaseTable v-model:tableConfig="tableOption"></BaseTable>
+      <BaseTable v-model:tableConfig="tableOption" ref="baseTableRef"></BaseTable>
     </div>
     <!-- 右侧面板 -->
     <div class="right-panel" v-show="isPanelOpen">
       <el-scrollbar height="100%">
-        <!-- 直接修改相同数据源，无需保存 -->
         <PageConfig v-model="tableOption"></PageConfig>
       </el-scrollbar>
     </div>
-    <Teleport to="body">
-      <div v-if="dialogVisible" class="modal">
+    <!-- <Teleport to="body">
+      <div v-if="EDesignerDialogVisible" class="modal">
         <EDesigner title="表单配置" @save="saveFormHandler">
           <template #header-prefix>
             <div class="modal-header-prefix"></div>
           </template>
           <template #header-right-suffix>
-            <el-icon class="ml3" @click="dialogVisible = false"><Close /></el-icon>
+            <el-icon class="ml3" @click="EDesignerDialogVisible = false"><Close /></el-icon>
           </template>
         </EDesigner>
       </div>
-    </Teleport>
+    </Teleport> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import { useNamespace } from "@/hooks";
-import { ref } from "vue";
-import { EDesigner, type PageSchema } from "epic-designer";
+import { ref, useTemplateRef } from "vue";
 import { Close } from "@element-plus/icons-vue";
 import BaseTable from "@/components/BaseTable/src/BaseTable.vue";
 import type { TableType } from "@/components/BaseTable/index";
-// import TableConfig from "./src/TableConfig.vue";
 import PageConfig from "./src/PageConfig.vue";
 import { defaultTableAttr, defaultColumnAttr } from "@/views/projectConfig/src/pageConfig";
 import { cloneDeep } from "lodash-es";
@@ -44,25 +40,12 @@ import {
   defaultSearchColumnAttrs,
 } from "@/views/projectConfig/src/searchConfig";
 import type { IPageConfig } from "@/views/projectConfig/src/pageConfig";
-
+import type { IPageDate } from "@/views/projectConfig/index";
 const { getPageData } = useProjectCache();
 
 const ns = useNamespace("projectConfig");
-// const tableRef = ref<any>();
-// onMounted(() => {
-//   console.log("tableRef", tableRef.value);
-// });
 
 const isPanelOpen = ref(true); // 控制面板展开状态
-
-const togglePanel = () => {
-  isPanelOpen.value = !isPanelOpen.value; // 切换面板状态
-};
-const dialogVisible = ref(false);
-
-const showFormConfig = () => {
-  dialogVisible.value = true;
-};
 
 const loading = ref(false);
 const tableOption = reactive<IPageConfig>({
@@ -138,9 +121,7 @@ const tableOption = reactive<IPageConfig>({
             text: "编辑",
           },
           event: {
-            click: () => {
-              dialogVisible.value = true;
-            },
+            click: () => {},
           },
           eventConfigs: {},
         },
@@ -312,8 +293,18 @@ const tableOption = reactive<IPageConfig>({
     event: {},
     eventConfigs: {},
   },
+  pagination: {
+    currentPage: 1,
+    pageSize: 20,
+    total: 100,
+  },
 });
 
+const baseTableRef = useTemplateRef("baseTableRef");
+provide<IPageDate>("pageDate", {
+  pageConfig: tableOption,
+  baseTableRef,
+});
 const init = async () => {
   const data = await getPageData();
   if (data) {
@@ -324,10 +315,6 @@ const init = async () => {
   }
 };
 init();
-
-const saveFormHandler = (e: PageSchema) => {
-  dialogVisible.value = false;
-};
 </script>
 
 <style lang="scss" scoped>
@@ -370,15 +357,5 @@ const saveFormHandler = (e: PageSchema) => {
   height: 40px; /* 按钮高度 */
   padding: 0; /* 去除内边距 */
   z-index: 1000; /* 确保按钮在最上层 */
-}
-
-.modal {
-  position: fixed;
-  z-index: 999999;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90vw;
-  height: 90vh;
 }
 </style>

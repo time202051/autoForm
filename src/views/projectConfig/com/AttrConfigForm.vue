@@ -17,7 +17,12 @@
           :placeholder="`请选择${item.label}`"
           v-bind="{
             ...item.attr,
-            onChange: (...args: any[]) => item.attr?.onChange(modelValue, args),
+            onChange: (...args: any[]) =>
+              item.attr?.onChange({
+                attrs,
+                modelValue,
+                args,
+              }),
           }"
         >
           <el-option

@@ -85,8 +85,4 @@ const removeColumn = (index: number) => {
     }
   }
 }
-
-:deep(.el-collapse-item__header) {
-  background-color: #f8f8f8;
-}
 </style>

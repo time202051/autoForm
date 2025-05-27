@@ -8,7 +8,7 @@
       ></SearchConfigCom>
       <ActionBarConfigCom
         v-else-if="selectedModule == ModuleTypeEnum.ACTIONBAR"
-        v-model="tableConfig.actionBarConfig"
+        v-model="tableConfig.actionBarConfig!"
       ></ActionBarConfigCom>
       <el-tabs v-else v-model="activeName" class="demo-tabs">
         <el-tab-pane label="属性" name="attrName">
@@ -366,10 +366,6 @@ const codeMirrorSave = (data: any) => {
   }
 }
 
-:deep(.el-collapse-item__header) {
-  background-color: #f8f8f8;
-}
-
 // 事件样式
 .events-panel {
   padding: 20px;
@@ -404,7 +400,6 @@ const codeMirrorSave = (data: any) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #fff;
 }
 
 .add-button {
