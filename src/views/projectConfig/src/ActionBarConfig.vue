@@ -35,7 +35,7 @@
               v-model:eventConfigs="column.eventConfigs"
             ></AttrConfigForm>
           </CollapsibleCard>
-          <el-button type="primary" @click="addColumn" class="add-button">
+          <el-button type="primary" @click="addColumn" class="lcAdd-button">
             <el-icon><Plus /></el-icon>
             添加按钮
           </el-button>

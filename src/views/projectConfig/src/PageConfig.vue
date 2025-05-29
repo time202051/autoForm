@@ -137,7 +137,7 @@
                       type="primary"
                       size="small"
                       @click="addActionButton(column)"
-                      class="add-button"
+                      class="lcAdd-button"
                     >
                       <el-icon><Plus /></el-icon>
                       添加按钮
@@ -145,7 +145,7 @@
                   </div>
                 </template>
               </CollapsibleCard>
-              <el-button type="primary" @click="addColumn" class="add-button">
+              <el-button type="primary" @click="addColumn" class="lcAdd-button">
                 <el-icon><Plus /></el-icon>
                 添加列
               </el-button>

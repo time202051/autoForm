@@ -29,7 +29,7 @@
               ></AttrConfigForm>
               <!-- v-mode:eventConfigs="column.eventConfigs" -->
             </CollapsibleCard>
-            <el-button type="primary" @click="addColumn" class="add-button">
+            <el-button type="primary" @click="addColumn" class="lcAdd-button">
               <el-icon><Plus /></el-icon>
               添加查询条件
             </el-button>
