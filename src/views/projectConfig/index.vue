@@ -5,7 +5,7 @@
       <BaseTable v-model:tableConfig="tableOption" ref="baseTableRef"></BaseTable>
     </div>
     <!-- 右侧面板 -->
-    <div class="right-panel" v-show="isPanelOpen">
+    <div class="right-panel">
       <el-scrollbar height="100%">
         <PageConfig v-model="tableOption"></PageConfig>
       </el-scrollbar>
@@ -44,8 +44,6 @@ import type { IPageDate } from "@/views/projectConfig/index";
 const { getPageData } = useProjectCache();
 
 const ns = useNamespace("projectConfig");
-
-const isPanelOpen = ref(true); // 控制面板展开状态
 
 const loading = ref(false);
 const tableOption = reactive<IPageConfig>({

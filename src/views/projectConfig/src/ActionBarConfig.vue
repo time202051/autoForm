@@ -35,12 +35,10 @@
               v-model:eventConfigs="column.eventConfigs"
             ></AttrConfigForm>
           </CollapsibleCard>
-          <div class="column-tools">
-            <el-button type="primary" @click="addColumn">
-              <el-icon><Plus /></el-icon>
-              添加查询条件
-            </el-button>
-          </div>
+          <el-button type="primary" @click="addColumn" class="add-button">
+            <el-icon><Plus /></el-icon>
+            添加按钮
+          </el-button>
         </el-collapse-item>
       </el-collapse>
     </el-tab-pane>

@@ -133,15 +133,22 @@
                     </CollapsibleCard>
                   </template>
                   <div class="action-buttons">
-                    <el-button type="primary" size="small" @click="addActionButton(column)">
+                    <el-button
+                      type="primary"
+                      size="small"
+                      @click="addActionButton(column)"
+                      class="add-button"
+                    >
+                      <el-icon><Plus /></el-icon>
                       添加按钮
                     </el-button>
                   </div>
                 </template>
               </CollapsibleCard>
-              <div class="column-tools">
-                <el-button type="primary" @click="addColumn">添加列</el-button>
-              </div>
+              <el-button type="primary" @click="addColumn" class="add-button">
+                <el-icon><Plus /></el-icon>
+                添加列
+              </el-button>
             </el-collapse-item>
           </el-collapse>
         </el-tab-pane>
@@ -359,9 +366,6 @@ const codeMirrorSave = (data: any) => {
       position: absolute;
       right: 0px;
       top: 0px;
-    }
-    .column-tools {
-      margin-bottom: 16px;
     }
   }
 }

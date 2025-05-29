@@ -29,12 +29,10 @@
               ></AttrConfigForm>
               <!-- v-mode:eventConfigs="column.eventConfigs" -->
             </CollapsibleCard>
-            <div class="column-tools">
-              <el-button type="primary" @click="addColumn">
-                <el-icon><Plus /></el-icon>
-                添加查询条件
-              </el-button>
-            </div>
+            <el-button type="primary" @click="addColumn" class="add-button">
+              <el-icon><Plus /></el-icon>
+              添加查询条件
+            </el-button>
           </el-collapse-item>
         </el-collapse>
       </el-tab-pane>
@@ -77,12 +75,5 @@ const removeColumn = (index: number) => {
 <style scoped lang="scss">
 .search-config {
   width: 100%;
-
-  .config-panel {
-    position: relative;
-    .column-tools {
-      margin-bottom: 16px;
-    }
-  }
 }
 </style>
