@@ -34,15 +34,12 @@
       <LCTable ref="LCTableRef" :tableOption="tableConfig" v-bind="$attrs"></LCTable>
     </div>
 
-    <!-- 分页 -->
+    <!-- 分页 不需要配置-->
     <div
-      :class="[
-        'module-container',
-        'table-pagination',
-        ns.is('selected', projectStore.selectedModule === ModuleTypeEnum.PAGINATION),
-      ]"
+      :class="['module-container', 'table-pagination']"
       @click="projectStore.setSelectedModule(ModuleTypeEnum.PAGINATION)"
     >
+      <!-- ns.is('selected', projectStore.selectedModule === ModuleTypeEnum.PAGINATION), -->
       <el-pagination
         ref="paginationRef"
         v-model:current-page="tableConfig.pagination.currentPage"
@@ -62,12 +59,6 @@
       draggable
     >
       <DialogForm v-if="dialogFormData.visible" :dialogFormData></DialogForm>
-      <!-- <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialogFormData.visible = false">取消</el-button>
-          <el-button type="primary" @click="dialogFormData.visible = false">确定</el-button>
-        </div>
-      </template> -->
     </el-dialog>
   </div>
 </template>
@@ -129,7 +120,9 @@ const projectStore = useProjectStore();
   }
 
   .table-pagination {
-    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
 }
 // ====

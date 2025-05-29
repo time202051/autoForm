@@ -38,3 +38,8 @@ const fontColor = computed(() => {
   return settingsStore.theme === ThemeMode.DARK ? "rgba(255, 255, 255, .15)" : "rgba(0, 0, 0, .15)";
 });
 </script>
+<style lang="scss" scoped>
+:deep(.eDesignerDialog) {
+  --el-dialog-padding-primary: 0 !important;
+}
+</style>

@@ -98,6 +98,7 @@ const handleButtonLogic = (btnType: number, column: any) => {
   // 清空自定义事件event,eventConfigs
   column.event = {};
   column.eventConfigs = {};
+  column.attr.type = "primary";
   switch (btnType) {
     case 0: // 新建
       console.log("组态-执行新建逻辑", column);
@@ -125,8 +126,13 @@ const handleButtonLogic = (btnType: number, column: any) => {
       console.log("组态-执行导出逻辑", column);
       column.attr.label = "导出";
       break;
+    case 6: // 导出
+      console.log("组态-执行导出逻辑", column);
+      column.attr.label = "文本";
+      break;
     default:
       // console.log("组态-未知按钮类型", column);
+
       break;
   }
 };

@@ -1,24 +1,34 @@
 <template>
   <div :class="ns.b()">
-    <EBuilder v-if="pageSchema" ref="ebForm" :pageSchema="pageSchema" />
+    <!-- <EBuilder v-if="pageSchema" ref="ebForm" :pageSchema="pageSchema" /> -->
     <div class="dialog-footer">
       <el-button @click="dialogFormData.visible = false">取消</el-button>
       <el-button type="primary" @click="onSubmit">确定</el-button>
-      <el-button type="primary" @click="eDesignerHandler">编辑页面</el-button>
+      <el-button type="success" @click="eDesignerHandler">编辑页面</el-button>
     </div>
   </div>
-  <Teleport to="body">
-    <div v-if="eDesignerDialogVisible" class="modal">
-      <EDesigner title="表单配置" :defaultSchema formMode @save="saveFormHandler">
-        <template #header-prefix>
-          <div class="modal-header-prefix"></div>
-        </template>
-        <template #header-right-suffix>
-          <el-icon class="ml3" @click="eDesignerDialogVisible = false"><Close /></el-icon>
-        </template>
-      </EDesigner>
-    </div>
-  </Teleport>
+
+  <el-dialog
+    v-model="eDesignerDialogVisible"
+    fullscreen
+    :show-close="false"
+    class="eDesignerDialog"
+  >
+    <EDesigner
+      v-if="eDesignerDialogVisible"
+      title="表单配置"
+      :defaultSchema
+      :formMode="false"
+      @save="saveFormHandler"
+    >
+      <template #header-prefix>
+        <div class="modal-header-prefix"></div>
+      </template>
+      <template #header-right-suffix>
+        <el-icon class="ml3" @click="eDesignerDialogVisible = false"><Close /></el-icon>
+      </template>
+    </EDesigner>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -54,6 +64,7 @@ const ns = useNamespace("dialogForm");
 const eDesignerHandler = () => {
   eDesignerDialogVisible.value = true;
 };
+
 const saveFormHandler = (e: PageSchema) => {
   pageSchema.schemas = e.schemas;
   defaultSchema.value = e;

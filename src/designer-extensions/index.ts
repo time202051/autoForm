@@ -1,9 +1,12 @@
 import { pluginManager } from "epic-designer";
-import Test from "./test";
+import RemoteSelect from "./remoteSelect";
+import { setupPublicMethod } from './script/index';
 
 // 安装扩展
 export function setupDesignerExtensions(): void {
+  setupPublicMethod();
 
   // 注册组件
-  pluginManager.registerComponent(Test);
+  pluginManager.registerComponent(RemoteSelect);
+
 }
