@@ -195,6 +195,7 @@ const saveEditor = () => {
   .editor-body {
     flex: 1;
     padding: 10px;
+    overflow: hidden;
   }
   .editor-footer {
     padding: 5px 15px 15px 15px;
