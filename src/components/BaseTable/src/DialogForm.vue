@@ -1,6 +1,6 @@
 <template>
   <div :class="ns.b()">
-    <!-- <EBuilder v-if="pageSchema" ref="ebForm" :pageSchema="pageSchema" /> -->
+    <EBuilder v-if="pageSchema" ref="ebForm" :pageSchema="pageSchema" />
     <div class="dialog-footer">
       <el-button @click="dialogFormData.visible = false">取消</el-button>
       <el-button type="primary" @click="onSubmit">确定</el-button>
