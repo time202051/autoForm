@@ -117,6 +117,7 @@ const projectStore = useProjectStore();
   }
   .table-container {
     flex: 1;
+    overflow: auto;
   }
 
   .table-pagination {

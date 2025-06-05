@@ -27,7 +27,7 @@
                 v-model:event="column.customEvent"
                 v-model:eventConfigs="column.customEventConfigs"
               ></AttrConfigForm>
-              <!-- v-mode:eventConfigs="column.eventConfigs" -->
+              <!-- v-model:eventConfigs="column.eventConfigs" -->
             </CollapsibleCard>
             <el-button type="primary" @click="addColumn" class="lcAdd-button">
               <el-icon><Plus /></el-icon>

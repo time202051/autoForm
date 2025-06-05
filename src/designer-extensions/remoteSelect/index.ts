@@ -33,12 +33,12 @@ export default {
         type: 'input',
       },
       {
-        field: 'lcremoteurl',
+        field: 'lcRemoteurl',
         label: 'url',
         type: 'input',
       },
       {
-        field: 'componentProps.lcmethod',
+        field: 'componentProps.lcMethod',
         label: '请求类型',
         type: 'select',
         componentProps: {

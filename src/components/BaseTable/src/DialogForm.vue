@@ -13,6 +13,7 @@
     fullscreen
     :show-close="false"
     class="eDesignerDialog"
+    append-to-body
   >
     <EDesigner
       v-if="eDesignerDialogVisible"

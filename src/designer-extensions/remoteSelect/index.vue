@@ -51,9 +51,9 @@ const fetchRemoteOptions = async (query = "") => {
   // globalThis.setConsole(params, "remoteParams");
   // 接口
   const url =
-    props.componentSchema?.componentProps.lcremoteurl ||
+    props.componentSchema?.componentProps.lcRemoteurl ||
     "https://jsonplaceholder.typicode.com/posts";
-  const method = props.componentSchema.componentProps.lcmethod || "POST";
+  const method = props.componentSchema.componentProps.lcMethod || "POST";
   //后期替换接口
   fetch(url, {
     method,
