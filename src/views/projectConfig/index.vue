@@ -2,7 +2,13 @@
   <div :class="ns.b()">
     <!-- 左侧内容 -->
     <div class="left-content">
-      <BaseTable v-model:tableConfig="tableOption" ref="baseTableRef"></BaseTable>
+      <BaseTable
+        v-if="mainType == 0"
+        v-model:tableConfig="tableOption"
+        ref="baseTableRef"
+      ></BaseTable>
+      <div v-else-if="mainType == 1">form表单配置页面</div>
+      <!-- <DialogForm v-else-if="mainType == 1"></DialogForm> -->
     </div>
     <!-- 右侧面板 -->
     <div class="right-panel">
@@ -10,14 +16,38 @@
         <PageConfig v-model="tableOption"></PageConfig>
       </el-scrollbar>
     </div>
+
+    <!-- <el-dialog
+      v-model="eDesignerDialogVisible"
+      fullscreen
+      :show-close="false"
+      class="eDesignerDialog"
+      append-to-body
+    >
+      <EDesigner
+        v-if="eDesignerDialogVisible"
+        title="表单配置"
+        :defaultSchema
+        :formMode="false"
+        @save="saveFormHandler"
+      >
+        <template #header-prefix>
+          <div class="modal-header-prefix"></div>
+        </template>
+        <template #header-right-suffix>
+          <el-icon class="ml3" @click="eDesignerDialogVisible = false"><Close /></el-icon>
+        </template>
+      </EDesigner>
+    </el-dialog> -->
+
     <!-- <Teleport to="body">
-      <div v-if="EDesignerDialogVisible" class="modal">
+      <div v-if="eDesignerDialogVisible" class="modal">
         <EDesigner title="表单配置" @save="saveFormHandler">
           <template #header-prefix>
             <div class="modal-header-prefix"></div>
           </template>
           <template #header-right-suffix>
-            <el-icon class="ml3" @click="EDesignerDialogVisible = false"><Close /></el-icon>
+            <el-icon class="ml3" @click="eDesignerDialogVisible = false"><Close /></el-icon>
           </template>
         </EDesigner>
       </div>
@@ -32,7 +62,7 @@ import { Close } from "@element-plus/icons-vue";
 import BaseTable from "@/components/BaseTable/src/BaseTable.vue";
 import type { TableType } from "@/components/BaseTable/index";
 import PageConfig from "./src/PageConfig.vue";
-import { defaultTableAttr, defaultColumnAttr } from "@/views/projectConfig/src/pageConfig";
+import { defaultTableAttr, defaultColumnAttr } from "@/views/projectConfig/src/tableConfig";
 import { cloneDeep } from "lodash-es";
 import { useProjectCache } from "@/hooks";
 import {
@@ -41,7 +71,14 @@ import {
 } from "@/views/projectConfig/src/searchConfig";
 import type { IPageConfig } from "@/views/projectConfig/src/pageConfig";
 import type { IPageDate } from "@/views/projectConfig/index";
+import DialogForm from "@/components/BaseTable/src/DialogForm.vue";
+import { useSettingsStore } from "@/store";
+import { storeToRefs } from "pinia";
+
 const { getPageData } = useProjectCache();
+
+const settingsStore = useSettingsStore();
+const { mainType } = storeToRefs(settingsStore);
 
 const ns = useNamespace("projectConfig");
 
@@ -49,24 +86,33 @@ const loading = ref(false);
 const tableOption = reactive<IPageConfig>({
   data: [
     {
+      id: "1",
       date: "2016-05-03",
       name: "Tom",
       address: "No. 189, Grove St, Los Angeles",
+      children: [
+        { id: "1-1", date: "2016-05-03", name: "Tom", address: "No. 189, Grove St, Los Angeles" },
+        { id: "1-2", date: "2016-05-03", name: "Tom", address: "No. 189, Grove St, Los Angeles" },
+      ],
     },
     {
+      id: "2",
       date: "2016-05-02",
       name: "Tom",
       address: "No. 189, Grove St, Los Angeles",
     },
     {
+      id: "3",
       date: "2016-05-04",
       name: "Tom",
       address: "No. 189, Grove St, Los Angeles",
     },
     {
+      id: "4",
       date: "2016-05-01",
       name: "Tom",
-      address: "No. 189, Grove St, Los Angeles",
+      address:
+        "No. 189, Grove St, Los Angelesfegrwerwerwerwfewewewewewewewewewewewewewewewewewewewewewewewewewewewewewewewewewbvagadfsgwer",
     },
   ],
   loading: loading,
@@ -113,20 +159,20 @@ const tableOption = reactive<IPageConfig>({
         {
           comp: "ElButton",
           attr: {
-            type: "danger",
+            type: "primary",
+            link: true,
           },
           content: {
             text: "编辑",
           },
-          event: {
-            click: () => {},
-          },
+          event: {},
           eventConfigs: {},
         },
         {
           comp: "ElButton",
           attr: {
             type: "danger",
+            link: true,
           },
           content: {
             text: "删除",

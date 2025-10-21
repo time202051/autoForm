@@ -137,7 +137,7 @@ export const usePermissionStore = defineStore(
       }
       // 获取菜单数据
       const routerTemp = generateRoutesLowCode(menus);
-      resetRouter();
+      // resetRouter();
       const dynamicRoutes = await generateRoutesData(routerTemp);
       console.log("promission=》initMenu", routerTemp, dynamicRoutes);
       dynamicRoutes.forEach((route: RouteRecordRaw) => router.addRoute(route));

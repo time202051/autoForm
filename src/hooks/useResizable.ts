@@ -171,3 +171,27 @@ export function useResizable(
     }
   };
 }
+
+
+
+// const { position, size, isDragging, startDrag, startResize, cleanup, recalculatePosition } =
+//   useResizable(editor, { width: 800, height: 800 }, { minWidth: 400, minHeight: 300 });
+
+// // 监听对话框显示状态
+// watch(
+//   () => dialogVisible.value,
+//   (newVal) => {
+//     if (newVal) {
+//       nextTick(() => {
+//         recalculatePosition();
+//       });
+//     }
+//   },
+//   {
+//     immediate: true,
+//   }
+// );
+// // 组件卸载时清理
+// onUnmounted(() => {
+//   cleanup();
+// });

@@ -37,7 +37,7 @@ export enum LcSearchPropNnum {
 export interface IAttrConfig {
   label: string;  // 显示的标签名
   prop: string;   // 属性名 如果是editor会注册到eventConfig,customEventConfigs中
-  type: 'string' | 'number' | 'boolean' | 'enum' | 'function' | 'object' | any;  // 属性类型
+  type: 'string' | 'number' | 'boolean' | 'enum' | 'array' | 'function' | 'object' | 'editor' | any;  // 属性类型
   default?: any;  // 默认值
   options?: { label: string; value: any }[];  // 枚举选项
   description?: string;  // 属性描述

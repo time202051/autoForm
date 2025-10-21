@@ -531,45 +531,46 @@ export const tableColumnAttrs: IAttrConfig[] = [
   },
 ];
 
-export const defaultColumnAttr = {
-  prop: '', // 字段名，默认为空
-  label: '', // 列标题，默认为空
-  type: 'default', // 列类型，默认为 'default'
-  // width: '', // 列宽度，默认为空
-  // minWidth: '', // 最小宽度，默认为空
-  fixed: false, // 是否固定列，默认为 false
-  sortable: false, // 是否可排序，默认为 false
-  resizable: true, // 是否可调整宽度，默认为 true
-  align: 'left', // 对齐方式，默认为 'left'
-  headerAlign: 'left', // 表头对齐方式，默认为 'left'
-  showOverflowTooltip: false, // 是否显示 Tooltip，默认为 false
-  // className: '', // 列类名，默认为空
-  // labelClassName: '', // 表头类名，默认为空
-  reserveSelection: false, // 是否保留选项，默认为 false
-  filterPlacement: 'bottom', // 过滤弹出框定位，默认为 'bottom'
-  // filterClassName: '', // 过滤弹出框类名，默认为空
-  filterMultiple: true, // 过滤是否多选，默认为 true
+// export const defaultColumnAttr = {
+//   prop: '', // 字段名，默认为空
+//   label: '', // 列标题，默认为空
+//   type: 'default', // 列类型，默认为 'default'
+//   // width: '', // 列宽度，默认为空
+//   // minWidth: '', // 最小宽度，默认为空
+//   fixed: false, // 是否固定列，默认为 false
+//   sortable: false, // 是否可排序，默认为 false
+//   resizable: true, // 是否可调整宽度，默认为 true
+//   align: 'left', // 对齐方式，默认为 'left'
+//   headerAlign: 'left', // 表头对齐方式，默认为 'left'
+//   showOverflowTooltip: false, // 是否显示 Tooltip，默认为 false
+//   // className: '', // 列类名，默认为空
+//   // labelClassName: '', // 表头类名，默认为空
+//   reserveSelection: false, // 是否保留选项，默认为 false
+//   filterPlacement: 'bottom', // 过滤弹出框定位，默认为 'bottom'
+//   // filterClassName: '', // 过滤弹出框类名，默认为空
+//   filterMultiple: true, // 过滤是否多选，默认为 true
 
-  // sortOrders: ['ascending', 'descending', null], // 排序策略，默认为 ['ascending', 'descending', null]
-  // filters: [], // 过滤选项，默认为空数组
-  // renderHeader: undefined, // 自定义表头渲染函数，默认为 undefined
-  // sortMethod: undefined, // 自定义排序方法，默认为 undefined
-  // sortBy: undefined, // 排序字段，默认为 undefined
-  // formatter: undefined, // 格式化内容函数，默认为 undefined
-  // selectable: undefined, // 是否可选函数，默认为 undefined
-  // filterMethod: undefined, // 过滤方法，默认为 undefined
-  // filteredValue: undefined, // 已选过滤项，默认为 undefined
-  // tooltipFormatter: undefined, // 提示格式化函数，默认为 undefined
-};
+//   // sortOrders: ['ascending', 'descending', null], // 排序策略，默认为 ['ascending', 'descending', null]
+//   // filters: [], // 过滤选项，默认为空数组
+//   // renderHeader: undefined, // 自定义表头渲染函数，默认为 undefined
+//   // sortMethod: undefined, // 自定义排序方法，默认为 undefined
+//   // sortBy: undefined, // 排序字段，默认为 undefined
+//   // formatter: undefined, // 格式化内容函数，默认为 undefined
+//   // selectable: undefined, // 是否可选函数，默认为 undefined
+//   // filterMethod: undefined, // 过滤方法，默认为 undefined
+//   // filteredValue: undefined, // 已选过滤项，默认为 undefined
+//   // tooltipFormatter: undefined, // 提示格式化函数，默认为 undefined
+// };
 
 
 
-export type ModuleType = 'search' | 'actionBar' | 'table' | 'pagination' | ''
+export type ModuleType = 'search' | 'actionBar' | 'table' | 'pagination' | 'form' | ''
 export enum ModuleTypeEnum {
   SEARCH = 'search',
   ACTIONBAR = 'actionBar',
   TABLE = 'table',
   PAGINATION = 'pagination',
+  FORM = 'form',
   EMPTY = ''
 }
 

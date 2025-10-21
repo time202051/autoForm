@@ -24,6 +24,8 @@ export const useSettingsStore = defineStore("setting", () => {
   const themeColor = useStorage<string>("themeColor", defaultSettings.themeColor);
   const theme = useStorage<string>("theme", defaultSettings.theme);
 
+  const mainType = ref(0) //0:table页面 1:form页面
+
   // 监听主题变化
   watch(
     [theme, themeColor],
@@ -59,6 +61,10 @@ export const useSettingsStore = defineStore("setting", () => {
     layout.value = val;
   }
 
+  const mainTypeChange = (val: number) => {
+    mainType.value = val
+  }
+
   return {
     settingsVisible,
     tagsView,
@@ -71,5 +77,7 @@ export const useSettingsStore = defineStore("setting", () => {
     changeTheme,
     changeThemeColor,
     changeLayout,
+    mainType,
+    mainTypeChange
   };
 });

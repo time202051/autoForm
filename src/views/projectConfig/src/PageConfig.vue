@@ -2,15 +2,18 @@
   <div class="page-config">
     <div class="config-panel">
       <!-- 搜索框配置 -->
+      <!-- mainType -->
+      <FormConfig v-if="mainType == 1" />
       <SearchConfigCom
-        v-if="selectedModule == ModuleTypeEnum.SEARCH"
+        v-else-if="selectedModule == ModuleTypeEnum.SEARCH"
         v-model="tableConfig.searchConfig"
       ></SearchConfigCom>
       <ActionBarConfigCom
         v-else-if="selectedModule == ModuleTypeEnum.ACTIONBAR"
         v-model="tableConfig.actionBarConfig!"
       ></ActionBarConfigCom>
-      <el-tabs v-else v-model="activeName" class="demo-tabs">
+      <TableConfig v-else v-model="tableConfig"></TableConfig>
+      <el-tabs v-if="true" v-model="activeName" class="demo-tabs">
         <el-tab-pane label="属性" name="attrName">
           <el-collapse v-model="activeCollapse" accordion>
             <!-- 基础属性配置 -->
@@ -119,6 +122,7 @@
                             <el-option label="信息" value="info" />
                           </el-select>
                         </el-form-item>
+                        <!-- <ButtonConditionConfig /> -->
                         <el-form-item label="点击事件">
                           <el-button
                             type="primary"
@@ -174,7 +178,12 @@
           </div>
         </el-tab-pane>
       </el-tabs>
-      <SaveCurrentPage class="save-btn" :tableConfig></SaveCurrentPage>
+      <div class="save-btn">
+        <el-button type="primary" @click="mainTypeChange">
+          {{ mainType ? "表格配置" : "表单配置" }}
+        </el-button>
+        <SaveCurrentPage :tableConfig></SaveCurrentPage>
+      </div>
     </div>
 
     <!-- 代码编辑器弹框 -->
@@ -212,7 +221,11 @@ import SearchConfigCom from "./SearchConfig.vue";
 import { useProjectStore } from "@/store";
 import { ModuleTypeEnum } from "@/views/projectConfig/src/pageConfig";
 import ActionBarConfigCom from "@/views/projectConfig/src/ActionBarConfig.vue";
-
+import TableConfig from "@/views/projectConfig/src/TableConfig.vue";
+import { useSettingsStore } from "@/store";
+import { storeToRefs } from "pinia";
+import FormConfig from "@/views/projectConfig/src/FormConfig.vue";
+import ButtonConditionConfig from "../com/ButtonConditionConfig.vue";
 // const props = withDefaults(
 //   defineProps<{
 //     modelValue: any;
@@ -297,7 +310,7 @@ const addActionButton = (column: any) => {
     comp: "ElButton",
     attr: {
       type: "primary",
-      // size: "small",
+      link: true,
     },
     content: {
       text: "按钮",
@@ -310,7 +323,6 @@ const addActionButton = (column: any) => {
 // 删除操作按钮
 const removeActionButton = (column: any, btnIndex: number) => {
   // 动态判断是否有值
-  // 动态判断是否有值
   const hasEventConfigs = hasEvents.some((field) => {
     if (column[field] && Array.isArray(column[field])) {
       return Object.keys(column[field][btnIndex].eventConfigs).length > 0;
@@ -318,7 +330,6 @@ const removeActionButton = (column: any, btnIndex: number) => {
     return false;
   });
 
-  console.log(123, column);
   // 注册事件需要确认删除
   if (hasEventConfigs) {
     ElMessageBox.confirm("当前按钮有事件配置，是否删除？", "按钮删除", {
@@ -353,6 +364,13 @@ const codeMirrorClose = () => {
 };
 const codeMirrorSave = (data: any) => {
   codeMirrorClose();
+};
+
+const settingsStore = useSettingsStore();
+const { mainType } = storeToRefs(settingsStore);
+const mainTypeChange = () => {
+  const type = mainType.value === 0 ? 1 : 0;
+  settingsStore.mainTypeChange(type);
 };
 </script>
 
@@ -411,108 +429,108 @@ const codeMirrorSave = (data: any) => {
   font-size: 16px;
 }
 
-// 添加遮罩层样式
-.editor-overlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1999; // 确保在编辑器容器之下
-}
-.editor-container {
-  position: fixed;
-  z-index: 2000;
-  background-color: var(--el-bg-color);
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  width: 800px;
-  height: 800px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #e4e7ed;
-  .editor-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: var(--el-bg-color-overlay);
-    border-bottom: 1px solid #e4e7ed;
-    border-radius: 4px 4px 0 0;
-    user-select: none; /* 防止拖拽时选中文字 */
-  }
-  .editor-body {
-    flex: 1;
-    padding: 10px;
-  }
-  .editor-footer {
-    padding: 5px 15px 15px 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .left-space {
-    width: 20px;
-  }
+// // 添加遮罩层样式
+// .editor-overlay {
+//   position: fixed;
+//   top: 0;
+//   right: 0;
+//   bottom: 0;
+//   left: 0;
+//   background-color: rgba(0, 0, 0, 0.5);
+//   z-index: 1999; // 确保在编辑器容器之下
+// }
+// .editor-container {
+//   position: fixed;
+//   z-index: 2000;
+//   background-color: var(--el-bg-color);
+//   border-radius: 4px;
+//   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+//   width: 800px;
+//   height: 800px;
+//   display: flex;
+//   flex-direction: column;
+//   border: 1px solid #e4e7ed;
+//   .editor-header {
+//     display: flex;
+//     justify-content: space-between;
+//     align-items: center;
+//     padding: 10px;
+//     background-color: var(--el-bg-color-overlay);
+//     border-bottom: 1px solid #e4e7ed;
+//     border-radius: 4px 4px 0 0;
+//     user-select: none; /* 防止拖拽时选中文字 */
+//   }
+//   .editor-body {
+//     flex: 1;
+//     padding: 10px;
+//   }
+//   .editor-footer {
+//     padding: 5px 15px 15px 15px;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//   }
+//   .left-space {
+//     width: 20px;
+//   }
 
-  .dialog-title {
-    flex: 1;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 500;
-    color: #303133;
-  }
+//   .dialog-title {
+//     flex: 1;
+//     text-align: center;
+//     font-size: 16px;
+//     font-weight: 500;
+//     color: #303133;
+//   }
 
-  .close-icon {
-    font-size: 20px;
-    color: #909399;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
+//   .close-icon {
+//     font-size: 20px;
+//     color: #909399;
+//     cursor: pointer;
+//     transition: all 0.3s;
+//   }
 
-  .close-icon:hover {
-    color: #303133;
-  }
+//   .close-icon:hover {
+//     color: #303133;
+//   }
 
-  /* 拖拽时添加一些视觉反馈 */
-  .editor-header:active {
-    cursor: grabbing;
-  }
+//   /* 拖拽时添加一些视觉反馈 */
+//   .editor-header:active {
+//     cursor: grabbing;
+//   }
 
-  /* 防止文本选择 */
-  .editor-header * {
-    user-select: none;
-  }
-  .resize-handle {
-    position: absolute;
-    background: transparent;
+//   /* 防止文本选择 */
+//   .editor-header * {
+//     user-select: none;
+//   }
+//   .resize-handle {
+//     position: absolute;
+//     background: transparent;
 
-    &-e {
-      top: 0;
-      right: -5px;
-      width: 10px;
-      height: 100%;
-      cursor: e-resize;
-    }
+//     &-e {
+//       top: 0;
+//       right: -5px;
+//       width: 10px;
+//       height: 100%;
+//       cursor: e-resize;
+//     }
 
-    &-s {
-      bottom: -5px;
-      left: 0;
-      width: 100%;
-      height: 10px;
-      cursor: s-resize;
-    }
+//     &-s {
+//       bottom: -5px;
+//       left: 0;
+//       width: 100%;
+//       height: 10px;
+//       cursor: s-resize;
+//     }
 
-    &-se {
-      bottom: -5px;
-      right: -5px;
-      width: 10px;
-      height: 10px;
-      cursor: se-resize;
-    }
-  }
-}
+//     &-se {
+//       bottom: -5px;
+//       right: -5px;
+//       width: 10px;
+//       height: 10px;
+//       cursor: se-resize;
+//     }
+//   }
+// }
 
 .el-form-item {
   :deep(.el-tooltip__trigger) {

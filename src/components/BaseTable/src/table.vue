@@ -15,15 +15,16 @@
     v-bind="tableOption.attr"
     v-on="bindEvents"
     :class="[ns.b()]"
+    :key="tableKey"
   >
     <!-- v-on="tableOption.event || {}" -->
     <!-- 不attr.type切换时候不生效可能得重新加载 -->
-
     <el-table-column
       v-for="(tableColumn, index) of tableOption.columnArr"
       :key="setKey(index, tableColumn.attr?.label)"
       v-bind="tableColumn.attr"
     >
+      <!-- {{ tableColumn.attr }} -->
       <template #header v-if="tableColumn.headerSlotName || tableColumn.headerSlotConfig">
         <BasicComponent
           v-if="tableColumn.headerSlotConfig"
@@ -92,9 +93,19 @@ import { useEventHandler } from "@/hooks";
 import { ComponentInternalInstance } from "vue";
 
 const ns = useNamespace("table");
-const props = defineProps<{
-  tableOption: TableType | any;
-}>();
+// const props = defineProps<{
+//   tableOption: TableType | any;
+// }>();
+const props = withDefaults(
+  defineProps<{
+    tableOption?: TableType | any;
+  }>(),
+  {
+    tableOption: () => {
+      return {};
+    },
+  }
+);
 
 // const emit = defineEmits(["update:tableOption"]);
 
@@ -203,10 +214,7 @@ defineExpose({
   tableRef,
   instance,
 });
-const { bindEvents, bindEventsHandler } = useEventHandler(
-  props.tableOption,
-  baseTableInstance
-);
+const { bindEvents, bindEventsHandler } = useEventHandler(props.tableOption, baseTableInstance);
 // const bindEvents = computed(() => {
 //   if (!props.tableOption.event) return {};
 //   const events: any = {};
@@ -247,6 +255,16 @@ const { bindEvents, bindEventsHandler } = useEventHandler(
 //   });
 //   return events;
 // };
+
+const tableKey = ref(0);
+//为了type类型selection,index等切换时候更新
+watch(
+  () => props.tableOption?.columnArr,
+  () => {
+    tableKey.value += 1;
+  },
+  { deep: true, immediate: true }
+);
 </script>
 
 <style scoped lang="less"></style>

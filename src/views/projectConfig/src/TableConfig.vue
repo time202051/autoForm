@@ -1,200 +1,167 @@
 <template>
-  <div>
-    <PageConfig @save="onSave"></PageConfig>
-    <!-- 组件选择器 -->
-    <el-select v-model="selectedComponent" placeholder="选择组件">
-      <el-option
-        v-for="component in components"
-        :key="component"
-        :label="component"
-        :value="component"
-      />
-    </el-select>
-
-    <!-- 动态配置表单 -->
-    <div v-if="selectedComponent">
-      <el-collapse v-model="activeCollapse">
-        <!-- 属性配置 -->
-        <el-collapse-item title="属性配置" name="props">
-          <el-form :model="config" label-width="100px" label-position="left">
-            <el-form-item
-              v-for="(prop, key) in componentMetadata[selectedComponent].props"
-              :key="key"
-              :label="prop.label"
-            >
-              <!-- 正常就输入框，下拉框框，开关boolean -->
-              <el-input
-                v-if="prop.type === 'string' && !prop.options"
-                v-model="config.props[key]"
-              />
-              <el-select
-                v-else-if="prop.type === 'string' && prop.options"
-                v-model="config.props[key]"
-              >
-                <el-option
-                  v-for="option in prop.options"
-                  :key="option.value"
-                  :label="option.label"
-                  :value="option.value"
-                />
-              </el-select>
-              <el-switch v-else-if="prop.type === 'boolean'" v-model="config.props[key]" />
-            </el-form-item>
-          </el-form>
+  <el-tabs v-model="activeName">
+    <el-tab-pane label="属性" name="attrName">
+      <el-collapse v-model="activeCollapse" accordion>
+        <el-collapse-item title="基础属性" name="basic">
+          <AttrConfigForm
+            :attrs="tableAttrs"
+            v-model="tableConfig.attr"
+            v-model:event="tableConfig.event"
+            v-model:eventConfigs="tableConfig.eventConfigs"
+          ></AttrConfigForm>
         </el-collapse-item>
-
-        <!-- 事件配置 -->
-        <el-collapse-item title="事件配置" name="events">
-          <el-form :model="config" label-width="120px" label-position="left">
-            <el-form-item
-              v-for="(event, key) in componentMetadata[selectedComponent].events"
-              :key="key"
-              :label="event.label"
-            >
-              <el-input v-model="config.events[key]" />
-            </el-form-item>
-          </el-form>
-        </el-collapse-item>
-
-        <!-- 插槽配置 -->
-        <el-collapse-item title="插槽配置" name="slots">
-          <el-form :model="config" label-width="120px" label-position="left">
-            <el-form-item
-              v-for="(slot, key) in componentMetadata[selectedComponent].slots"
-              :key="key"
-              :label="slot.label"
-            >
-              <el-input v-model="config.slots[key]" />
-            </el-form-item>
-          </el-form>
+        <el-collapse-item title="列配置" name="column">
+          <CollapsibleCard
+            v-for="(column, index) in tableConfig.columnArr"
+            :key="index"
+            @close="removeColumn(index)"
+          >
+            <template #header>
+              <span># {{ index + 1 }}</span>
+            </template>
+            <AttrConfigForm
+              :attrs="tableColumnAttrs"
+              v-model="column.attr"
+              v-model:event="column.customEvent"
+              v-model:eventConfigs="column.customEventConfigs"
+            ></AttrConfigForm>
+            <!-- v-model:eventConfigs="column.eventConfigs" -->
+          </CollapsibleCard>
         </el-collapse-item>
       </el-collapse>
-
-      <el-button type="primary" @click="onSubmit">提交</el-button>
-    </div>
-  </div>
+    </el-tab-pane>
+    <el-tab-pane label="事件" name="eventName">
+      <div v-for="(item, index) in elTableEvents" :key="index">
+        <div class="event-group">
+          <div class="event-group-title">{{ item.title }}</div>
+          <div class="event-list">
+            <div v-for="(eventItem, i) in item.evnets" :key="i" class="event-item">
+              <div class="event-header">
+                <span>{{ eventItem.label }}</span>
+                <el-button
+                  link
+                  @click="codeMirrorOpen(eventItem.value, tableConfig)"
+                  class="add-button"
+                >
+                  <el-icon><Plus /></el-icon>
+                </el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-tab-pane>
+  </el-tabs>
+  <!-- 代码编辑器弹框 -->
+  <CodeMirrorEditor
+    v-if="codeMirrorVisible"
+    v-model="codeMirrorVisible"
+    v-model:eventConfigs="codeMirrorCurrentObject.eventConfigs"
+    v-model:event="codeMirrorCurrentObject.event"
+    :eventName="eventNameCodeMirror"
+    @save="codeMirrorSave"
+  ></CodeMirrorEditor>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from "vue";
-import type { ComponentMetadataMap, ComponentConfig } from "./tableConfig";
-import PageConfig from "./PageConfig.vue";
-import { cloneDeep } from "lodash";
+import type { IPageConfig } from "@/views/projectConfig/src/pageConfig.ts";
+import CodeMirrorEditor from "@/views/projectConfig/com/CodeMirrorEditor.vue";
+import CollapsibleCard from "@/views/projectConfig/com/CollapsibleCard.vue";
+import AttrConfigForm from "@/views/projectConfig/com/AttrConfigForm.vue";
+import { tableAttrs, tableColumnAttrs } from "@/views/projectConfig/src/tableConfig";
 
-// 支持的组件列表
-const components: string[] = ["ElInput", "ElSelect"];
-const emit = defineEmits(["save"]);
+const tableConfig = defineModel<IPageConfig>({ required: true, default: {} });
 
-enum FormPropKey {
-  KeyValue = "keyValue", // 字段名
-  Type = "type", // 类型
-  Placeholder = "placeholder", // 占位符
-  Disabled = "disabled", // 是否禁用
-  Clearable = "clearable", // 是否可清空
-  Maxlength = "maxlength", // 最大长度
-  Multiple = "multiple", // 是否多选
-  Filterable = "filterable", // 是否可过滤
-}
+const activeName = ref("attrName");
+const activeCollapse = ref(["basic"]);
 
-// 组件元数据
-const componentMetadata: ComponentMetadataMap = {
-  ElInput: {
-    props: {
-      [FormPropKey.KeyValue]: {
-        label: "字段名",
-        type: "string",
-      },
-      [FormPropKey.Type]: {
-        type: "string",
-        options: [
-          { label: "文本", value: "text" },
-          { label: "密码", value: "password" },
-          { label: "数字", value: "number" },
-        ],
-        label: "类型",
-      },
-      [FormPropKey.Placeholder]: { type: "string", label: "占位符" },
-      [FormPropKey.Disabled]: { type: "boolean", label: "是否禁用" },
-      [FormPropKey.Clearable]: { type: "boolean", label: "是否可清空" },
-      [FormPropKey.Maxlength]: { type: "number", label: "最大长度" },
-    },
-    events: {
-      input: { description: "输入时触发", label: "输入事件" },
-      change: { description: "值改变时触发", label: "值改变事件" },
-      focus: { description: "获取焦点时触发", label: "获取焦点事件" },
-      blur: { description: "失去焦点时触发", label: "失去焦点事件" },
-    },
-    slots: {
-      prefix: { description: "输入框前置内容", label: "前置插槽" },
-      suffix: { description: "输入框后置内容", label: "后置插槽" },
-      prepend: { description: "输入框前置内容", label: "前置内容插槽" },
-      append: { description: "输入框后置内容", label: "后置内容插槽" },
-    },
+// 定义 el-table 支持的事件列表
+const elTableEvents = [
+  {
+    title: "通用事件",
+    evnets: [
+      { value: "select", label: "行选择" }, // 当用户手动勾选数据行的 Checkbox 时触发的事件
+      { value: "select-all", label: "全选" }, // 当用户手动勾选全选 Checkbox 时触发的事件
+      { value: "selection-change", label: "选择变化" }, // 当选择项发生变化时会触发该事件
+      { value: "cell-click", label: "单元格点击" }, // 当某个单元格被点击时会触发该事件
+      { value: "cell-dblclick", label: "单元格双击" }, // 当某个单元格被双击时会触发该事件
+      { value: "row-click", label: "行点击" }, // 当某一行被点击时会触发该事件
+      { value: "row-dblclick", label: "行双击" }, // 当某一行被双击时会触发该事件
+      { value: "header-click", label: "表头点击" }, // 当某一列的表头被点击时会触发该事件
+      { value: "sort-change", label: "排序变化" }, // 当表格的排序条件发生变化的时候会触发该事件
+      { value: "current-change", label: "当前行变化" }, // 当表格的当前行发生变化的时候会触发该事件
+    ],
   },
-  ElSelect: {
-    props: {
-      [FormPropKey.KeyValue]: {
-        label: "字段名",
-        type: "string",
-      },
-      [FormPropKey.Multiple]: { type: "boolean", label: "是否多选" },
-      [FormPropKey.Disabled]: { type: "boolean", label: "是否禁用" },
-      [FormPropKey.Placeholder]: { type: "string", label: "占位符" },
-      [FormPropKey.Clearable]: { type: "boolean", label: "是否可清空" },
-      [FormPropKey.Filterable]: { type: "boolean", label: "是否可过滤" },
-    },
-    events: {
-      change: { description: "值改变时触发", label: "值改变事件" },
-      visibleChange: { description: "下拉框显示/隐藏时触发", label: "下拉框显示/隐藏事件" },
-      removeTag: { description: "多选模式下移除标签时触发", label: "移除标签事件" },
-    },
-    slots: {
-      default: { description: "选项内容", label: "默认插槽" },
-      prefix: { description: "选择框前置内容", label: "前置插槽" },
-      empty: { description: "无选项时的内容", label: "空状态插槽" },
-    },
+  {
+    title: "高级事件",
+    evnets: [
+      { value: "cell-mouse-enter", label: "hover进入" }, // 当用户对某一行展开或者关闭的时候会触发该事件
+      { value: "cell-mouse-leave", label: "hover退出" }, // 当用户对某一行展开或者关闭的时候会触发该事件
+      { value: "cell-contextmenu", label: "单元格右键菜单" }, // 当某个单元格被鼠标右键点击时会触发该事件
+      { value: "row-contextmenu", label: "行右键菜单" }, // 当某一行被鼠标右键点击时会触发该事件
+      { value: "header-contextmenu", label: "表头右键菜单" }, // 当某一列的表头被鼠标右键点击时触发该事件
+      { value: "filter-change", label: "过滤变化" }, // 当表格的过滤条件发生变化的时候会触发该事件
+      { value: "header-dragend", label: "表头拖拽结束" }, // 当拖动表头改变了列的宽度的时候会触发该事件
+      { value: "expand-change", label: "展开行变化" }, // 当用户对某一行展开或者关闭的时候会触发该事件
+      { value: "scroll", label: "滚动事件" }, // 当表格滚动时触发该事件（Element Plus 2.9.0+）
+    ],
   },
+];
+
+// 编辑弹框
+const codeMirrorVisible = ref<boolean>(false);
+const eventNameCodeMirror = ref<string>("");
+const codeMirrorCurrentObject = ref<any>({});
+const codeMirrorOpen = (key: string, obj: any) => {
+  codeMirrorVisible.value = true;
+  eventNameCodeMirror.value = key;
+  codeMirrorCurrentObject.value = obj;
+};
+const codeMirrorClose = () => {
+  codeMirrorVisible.value = false;
+  eventNameCodeMirror.value = "";
+  codeMirrorCurrentObject.value = {};
+};
+const codeMirrorSave = (data: any) => {
+  codeMirrorClose();
 };
 
-// 当前选择的组件
-const selectedComponent = ref<string>("");
-
-// 组件配置（使用 reactive）
-const config: ComponentConfig = reactive({
-  props: {},
-  events: {},
-  slots: {},
-});
-
-// 当前展开的折叠项
-const activeCollapse = ref<string[]>(["props", "events", "slots"]);
-
-// 监听组件选择变化，重置配置
-watch(selectedComponent, (newVal: string) => {
-  config.props = {};
-  config.events = {};
-  config.slots = {};
-});
-
-const onSave = (data: any) => {
-  emit("save", {
-    tableConfig: data,
-  });
-};
-// 提交表单
-const onSubmit = () => {
-  console.log("用户输入的配置：", config);
+const removeColumn = (index: number) => {
+  tableConfig.value.columnArr.splice(index, 1);
 };
 </script>
 
-<style scoped lang="scss">
-:deep(.el-collapse) {
-  --el-fill-color-blank: rgba(0, 0, 0, 0) !important;
+<style lang="scss" scoped>
+.event-group {
+  margin-bottom: 20px;
 }
-.preview {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #ddd;
+.event-group-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+.event-list {
+  border: 1px solid #e4e7ed;
   border-radius: 4px;
+}
+.event-item {
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.event-item:last-child {
+  border-bottom: none;
+}
+
+.event-header {
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-button {
+  padding: 0;
+  font-size: 16px;
 }
 </style>
