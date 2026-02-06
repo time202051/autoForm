@@ -7,8 +7,8 @@
         v-model:tableConfig="tableOption"
         ref="baseTableRef"
       ></BaseTable>
-      <div v-else-if="mainType == 1">form表单配置页面</div>
-      <!-- <DialogForm v-else-if="mainType == 1"></DialogForm> -->
+      <DialogForm v-else-if="mainType == 1"></DialogForm>
+      <!-- <div v-else-if="mainType == 1">form表单配置页面</div> -->
     </div>
     <!-- 右侧面板 -->
     <div class="right-panel">
@@ -111,8 +111,7 @@ const tableOption = reactive<IPageConfig>({
       id: "4",
       date: "2016-05-01",
       name: "Tom",
-      address:
-        "No. 189, Grove St, Los Angelesfegrwerwerwerwfewewewewewewewewewewewewewewewewewewewewewewewewewewewewewewewewewbvagadfsgwer",
+      address: "No. 189, Grove St, Los Angelesfegrwerw",
     },
   ],
   loading: loading,
